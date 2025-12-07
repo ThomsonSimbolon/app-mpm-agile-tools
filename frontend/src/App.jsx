@@ -9,6 +9,7 @@ import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import KanbanPage from './pages/KanbanPage';
 import SprintPage from './pages/SprintPage';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -51,6 +52,22 @@ function App() {
                 element={
                   <PrivateRoute>
                     <SprintPage />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <PrivateRoute>
+                    <Profile />
+                  </PrivateRoute>
+                }
+              />
+              <Route
+                path="/settings"
+                element={
+                  <PrivateRoute>
+                    <Profile />
                   </PrivateRoute>
                 }
               />

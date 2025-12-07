@@ -8,13 +8,15 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// Security middleware
-app.use(helmet());
-
-// CORS configuration
+// CORS configuration (must be before helmet for static files)
 app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
+}));
+
+// Security middleware
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
 // Body parser
@@ -34,8 +36,14 @@ const limiter = rateLimit({
 });
 app.use('/api', limiter);
 
-// Static files (uploads)
-app.use('/uploads', express.static('uploads'));
+// Static files (uploads) - must be before API routes
+app.use('/uploads', express.static('uploads', {
+  setHeaders: (res, path) => {
+    // Allow CORS for static files
+    res.set('Access-Control-Allow-Origin', process.env.FRONTEND_URL || 'http://localhost:5173');
+    res.set('Access-Control-Allow-Credentials', 'true');
+  }
+}));
 
 // Health check endpoint
 app.get('/health', (req, res) => {

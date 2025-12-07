@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const auth = require('../middleware/auth');
 const roleCheck = require('../middleware/roleCheck');
+const { avatarUpload } = require('../config/multer');
 
 router.use(auth);
 
@@ -26,6 +27,20 @@ router.get('/:id', userController.getById);
  * @access  Private
  */
 router.put('/:id', userController.update);
+
+/**
+ * @route   POST /api/users/:id/avatar
+ * @desc    Upload user avatar
+ * @access  Private
+ */
+router.post('/:id/avatar', avatarUpload.single('avatar'), userController.uploadAvatar);
+
+/**
+ * @route   DELETE /api/users/:id/avatar
+ * @desc    Delete user avatar
+ * @access  Private
+ */
+router.delete('/:id/avatar', userController.deleteAvatar);
 
 /**
  * @route   DELETE /api/users/:id

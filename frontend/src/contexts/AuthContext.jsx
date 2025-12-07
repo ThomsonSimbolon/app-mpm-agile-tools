@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import { authService } from '../services/authService';
+import { userService } from '../services/userService';
 
 const AuthContext = createContext(null);
 
@@ -41,11 +42,41 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
   };
 
+  const updateProfile = async (data) => {
+    if (!user) return { success: false, message: 'No user logged in' };
+    
+    const result = await userService.updateProfile(user.id, data);
+    if (result.success) {
+      // Update local user state
+      const updatedUser = { ...user, ...result.data.user };
+      setUser(updatedUser);
+      // Update localStorage
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+    }
+    return result;
+  };
+
+  const refreshUser = async () => {
+    if (!user) return;
+    
+    try {
+      const result = await authService.getCurrentUser();
+      if (result.success) {
+        setUser(result.data.user);
+        localStorage.setItem('user', JSON.stringify(result.data.user));
+      }
+    } catch (error) {
+      console.error('Failed to refresh user:', error);
+    }
+  };
+
   const value = {
     user,
     login,
     register,
     logout,
+    updateProfile,
+    refreshUser,
     isAuthenticated: !!user,
     loading
   };
@@ -60,3 +91,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

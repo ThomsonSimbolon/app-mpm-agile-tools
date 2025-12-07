@@ -1,5 +1,7 @@
 const { User } = require('../models');
 const { formatResponse } = require('../utils/helpers');
+const fs = require('fs').promises;
+const path = require('path');
 
 /**
  * Get all users (admin only)
@@ -62,10 +64,105 @@ exports.update = async (req, res, next) => {
       return res.status(403).json(formatResponse(false, 'You can only update your own profile'));
     }
 
-    const { full_name, avatar_url } = req.body;
-    await user.update({ full_name, avatar_url });
+    const { full_name } = req.body;
+    const updateData = {};
     
-    res.json(formatResponse(true, 'User updated successfully', { user }));
+    if (full_name !== undefined) updateData.full_name = full_name;
+    
+    await user.update(updateData);
+    
+    // Return user without password
+    const userResponse = user.toJSON();
+    
+    res.json(formatResponse(true, 'Profile updated successfully', { user: userResponse }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Upload user avatar
+ * POST /api/users/:id/avatar
+ */
+exports.uploadAvatar = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json(formatResponse(false, 'User not found'));
+    }
+
+    // Users can only update their own avatar unless they're admin
+    if (user.id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json(formatResponse(false, 'You can only update your own avatar'));
+    }
+
+    if (!req.file) {
+      return res.status(400).json(formatResponse(false, 'No file uploaded'));
+    }
+
+    // Delete old avatar if exists
+    if (user.avatar_url) {
+      try {
+        const oldAvatarPath = path.join(__dirname, '../../', user.avatar_url);
+        await fs.unlink(oldAvatarPath);
+      } catch (err) {
+        // If file doesn't exist, ignore error
+        console.log('Old avatar file not found or already deleted');
+      }
+    }
+
+    // Update avatar URL (relative path for flexibility)
+    const avatarUrl = `uploads/avatars/${req.file.filename}`;
+    await user.update({ avatar_url: avatarUrl });
+    
+    // Return user without password
+    const userResponse = user.toJSON();
+    
+    res.json(formatResponse(true, 'Avatar uploaded successfully', { 
+      user: userResponse,
+      avatar_url: avatarUrl 
+    }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * Delete user avatar
+ * DELETE /api/users/:id/avatar
+ */
+exports.deleteAvatar = async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    
+    if (!user) {
+      return res.status(404).json(formatResponse(false, 'User not found'));
+    }
+
+    // Users can only delete their own avatar unless they're admin
+    if (user.id !== req.user.id && req.user.role !== 'admin') {
+      return res.status(403).json(formatResponse(false, 'You can only delete your own avatar'));
+    }
+
+    if (!user.avatar_url) {
+      return res.status(400).json(formatResponse(false, 'No avatar to delete'));
+    }
+
+    // Delete avatar file
+    try {
+      const avatarPath = path.join(__dirname, '../../', user.avatar_url);
+      await fs.unlink(avatarPath);
+    } catch (err) {
+      console.log('Avatar file not found or already deleted');
+    }
+
+    // Update user record
+    await user.update({ avatar_url: null });
+    
+    const userResponse = user.toJSON();
+    
+    res.json(formatResponse(true, 'Avatar deleted successfully', { user: userResponse }));
   } catch (error) {
     next(error);
   }

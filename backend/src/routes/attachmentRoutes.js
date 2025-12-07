@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const attachmentController = require('../controllers/attachmentController');
 const auth = require('../middleware/auth');
-const upload = require('../config/multer');
+const { attachmentUpload } = require('../config/multer');
 
 router.use(auth);
 
@@ -13,7 +13,7 @@ router.use(auth);
  */
 router.post(
   '/tasks/:taskId/attachments',
-  upload.single('file'),
+  attachmentUpload.single('file'),
   attachmentController.upload
 );
 
