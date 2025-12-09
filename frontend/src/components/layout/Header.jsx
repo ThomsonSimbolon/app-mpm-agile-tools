@@ -48,9 +48,11 @@ export default function Header() {
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">M</span>
-              </div>
+              <img 
+                src="/images/logo/logo-mpm-agile-tools.png" 
+                alt="MPM Agile Tools Logo" 
+                className="h-8 w-auto object-contain"
+              />
               <span className="text-xl font-bold text-gray-900 dark:text-white">
                 MPM Agile Tools
               </span>

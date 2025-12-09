@@ -188,7 +188,7 @@ export default function TaskDetailModal({ taskId, isOpen, onClose, onUpdate }) {
           </h4>
 
           {/* Comments List */}
-          <div className="space-y-4 mb-4 max-h-64 overflow-y-auto">
+          <div className="space-y-4 mb-4 max-h-64 overflow-y-auto scrollbar-custom">
             {comments.length === 0 ? (
               <p className="text-gray-500 dark:text-gray-400 text-center py-4">
                 No comments yet. Be the first to comment!

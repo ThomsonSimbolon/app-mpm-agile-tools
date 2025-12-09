@@ -72,24 +72,22 @@ export default function KanbanPage() {
       <main className="max-w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
-            <Link to="/projects">
-              <Button variant="secondary" size="sm" className="flex items-center space-x-2">
-                <ArrowLeft size={16} />
-                <span>Back</span>
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                {project?.name}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                {project?.description || 'No description'}
-              </p>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {project?.name}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              {project?.description || 'No description'}
+            </p>
           </div>
           
           <div className="flex gap-2">
+            <Link to="/projects">
+              <Button variant="secondary" className="flex items-center space-x-2">
+                <ArrowLeft size={20} />
+                <span>Back</span>
+              </Button>
+            </Link>
             <Link to={`/projects/${projectId}/sprints`}>
               <Button variant="secondary" className="flex items-center space-x-2">
                 <TrendingUp size={20} />

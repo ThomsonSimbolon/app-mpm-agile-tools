@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import {
   DndContext,
   DragOverlay,
   closestCorners,
   PointerSensor,
   useSensor,
-  useSensors
-} from '@dnd-kit/core';
-import { taskService } from '../../services/taskService';
-import KanbanColumn from './KanbanColumn';
-import KanbanCard from './KanbanCard';
-import toast from 'react-hot-toast';
+  useSensors,
+} from "@dnd-kit/core";
+import { taskService } from "../../services/taskService";
+import KanbanColumn from "./KanbanColumn";
+import KanbanCard from "./KanbanCard";
+import toast from "react-hot-toast";
 
 const COLUMNS = [
-  { id: 'backlog', title: 'Backlog', color: 'gray' },
-  { id: 'todo', title: 'To Do', color: 'blue' },
-  { id: 'in_progress', title: 'In Progress', color: 'yellow' },
-  { id: 'in_review', title: 'In Review', color: 'purple' },
-  { id: 'done', title: 'Done', color: 'green' }
+  { id: "backlog", title: "Backlog", color: "gray" },
+  { id: "todo", title: "To Do", color: "blue" },
+  { id: "in_progress", title: "In Progress", color: "yellow" },
+  { id: "in_review", title: "In Review", color: "purple" },
+  { id: "done", title: "Done", color: "green" },
 ];
 
 export default function KanbanBoard({ projectId }) {
@@ -29,8 +29,8 @@ export default function KanbanBoard({ projectId }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8
-      }
+        distance: 8,
+      },
     })
   );
 
@@ -45,7 +45,7 @@ export default function KanbanBoard({ projectId }) {
         setTasks(result.data.items || []);
       }
     } catch (error) {
-      toast.error('Failed to load tasks');
+      toast.error("Failed to load tasks");
     } finally {
       setLoading(false);
     }
@@ -63,23 +63,25 @@ export default function KanbanBoard({ projectId }) {
       return;
     }
 
-    const activeTask = tasks.find(t => t.id === parseInt(active.id));
+    const activeTask = tasks.find((t) => t.id === parseInt(active.id));
     const overColumn = over.id;
 
     if (activeTask && activeTask.status !== overColumn) {
       // Optimistic update
-      setTasks(prev =>
-        prev.map(task =>
-          task.id === parseInt(active.id) ? { ...task, status: overColumn } : task
+      setTasks((prev) =>
+        prev.map((task) =>
+          task.id === parseInt(active.id)
+            ? { ...task, status: overColumn }
+            : task
         )
       );
 
       // API call
       try {
         await taskService.updateStatus(active.id, overColumn);
-        toast.success('Task moved successfully');
+        toast.success("Task moved successfully");
       } catch (error) {
-        toast.error('Failed to move task');
+        toast.error("Failed to move task");
         // Revert on error
         loadTasks();
       }
@@ -89,10 +91,12 @@ export default function KanbanBoard({ projectId }) {
   };
 
   const getTasksByStatus = (status) => {
-    return tasks.filter(task => task.status === status);
+    return tasks.filter((task) => task.status === status);
   };
 
-  const activeTask = activeId ? tasks.find(t => t.id === parseInt(activeId)) : null;
+  const activeTask = activeId
+    ? tasks.find((t) => t.id === parseInt(activeId))
+    : null;
 
   if (loading) {
     return (
@@ -109,8 +113,8 @@ export default function KanbanBoard({ projectId }) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 overflow-x-auto pb-4 min-h-[600px]">
-        {COLUMNS.map(column => (
+      <div className="flex gap-4 overflow-x-auto pb-4 min-h-[600px] scrollbar-custom">
+        {COLUMNS.map((column) => (
           <KanbanColumn
             key={column.id}
             column={column}
