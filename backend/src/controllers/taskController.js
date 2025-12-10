@@ -7,6 +7,7 @@ const {
   Comment,
   Attachment,
   TimeLog,
+  ProjectMember,
 } = require("../models");
 const {
   formatResponse,
@@ -14,6 +15,11 @@ const {
   formatPaginatedResponse,
 } = require("../utils/helpers");
 const { Op } = require("sequelize");
+const {
+  notifyTaskAssigned,
+  notifyTaskStatusChanged,
+} = require("../services/notificationService");
+const { emitToProject } = require("../config/socket");
 
 /**
  * Create new task
@@ -60,6 +66,20 @@ exports.create = async (req, res, next) => {
           attributes: ["id", "username", "full_name"],
         },
       ],
+    });
+
+    // Send notification if task is assigned
+    if (assigned_to && assigned_to !== req.user.id) {
+      const assignee = await User.findByPk(assigned_to);
+      if (assignee) {
+        await notifyTaskAssigned(fullTask, assignee, req.user);
+      }
+    }
+
+    // Emit real-time event for task creation
+    emitToProject(req.params.projectId, "task:created", {
+      task: fullTask,
+      createdBy: req.user.id,
     });
 
     res
@@ -199,6 +219,10 @@ exports.update = async (req, res, next) => {
       }
     });
 
+    // Track old values for notifications
+    const oldStatus = task.status;
+    const oldAssignee = task.assigned_to;
+
     await task.update(updateData);
 
     const updatedTask = await Task.findByPk(task.id, {
@@ -215,6 +239,43 @@ exports.update = async (req, res, next) => {
         },
       ],
     });
+
+    // Send notification if assignee changed
+    if (
+      updateData.assigned_to &&
+      updateData.assigned_to !== oldAssignee &&
+      updateData.assigned_to !== req.user.id
+    ) {
+      const assignee = await User.findByPk(updateData.assigned_to);
+      if (assignee) {
+        await notifyTaskAssigned(updatedTask, assignee, req.user);
+      }
+    }
+
+    // Send notification if status changed
+    if (updateData.status && updateData.status !== oldStatus) {
+      // Get project members to notify
+      const projectMembers = await ProjectMember.findAll({
+        where: { project_id: task.project_id },
+        attributes: ["user_id"],
+      });
+      const memberIds = projectMembers.map((m) => m.user_id);
+
+      // Add assignee and creator if not in members
+      const notifyUserIds = [
+        ...new Set(
+          [...memberIds, task.assigned_to, task.created_by].filter(Boolean)
+        ),
+      ];
+
+      await notifyTaskStatusChanged(
+        updatedTask,
+        oldStatus,
+        updateData.status,
+        req.user,
+        notifyUserIds
+      );
+    }
 
     res.json(
       formatResponse(true, "Task updated successfully", { task: updatedTask })
@@ -240,6 +301,31 @@ exports.updateStatus = async (req, res, next) => {
 
     const oldStatus = task.status;
     await task.update({ status });
+
+    // Send notification for status change
+    if (status !== oldStatus) {
+      // Get project members to notify
+      const projectMembers = await ProjectMember.findAll({
+        where: { project_id: task.project_id },
+        attributes: ["user_id"],
+      });
+      const memberIds = projectMembers.map((m) => m.user_id);
+
+      // Add assignee and creator if not in members
+      const notifyUserIds = [
+        ...new Set(
+          [...memberIds, task.assigned_to, task.created_by].filter(Boolean)
+        ),
+      ];
+
+      await notifyTaskStatusChanged(
+        task,
+        oldStatus,
+        status,
+        req.user,
+        notifyUserIds
+      );
+    }
 
     res.json(
       formatResponse(true, "Task status updated successfully", {

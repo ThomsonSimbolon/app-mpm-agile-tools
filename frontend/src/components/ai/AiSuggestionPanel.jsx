@@ -11,6 +11,18 @@ import {
   estimateStoryPoints,
 } from "../../services/aiService";
 
+// Daftar bahasa yang tersedia
+const LANGUAGE_OPTIONS = [
+  { code: "id", label: "Bahasa Indonesia" },
+  { code: "en", label: "English" },
+  { code: "es", label: "Español" },
+  { code: "fr", label: "Français" },
+  { code: "de", label: "Deutsch" },
+  { code: "ja", label: "日本語" },
+  { code: "zh", label: "中文" },
+  { code: "ko", label: "한국어" },
+];
+
 const AiSuggestionPanel = ({
   taskTitle,
   taskDescription,
@@ -22,6 +34,7 @@ const AiSuggestionPanel = ({
   const [activeTab, setActiveTab] = useState("description");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState("id"); // Default Bahasa Indonesia
 
   // Generated content
   const [generatedDescription, setGeneratedDescription] = useState(null);
@@ -41,6 +54,7 @@ const AiSuggestionPanel = ({
       const response = await generateTaskDescription({
         title: taskTitle,
         projectContext: projectContext || "",
+        language: selectedLanguage,
       });
 
       if (response.success) {
@@ -165,6 +179,24 @@ const AiSuggestionPanel = ({
               Generate deskripsi task otomatis berdasarkan judul dan konteks
               project.
             </p>
+
+            {/* Language Selector */}
+            <div className="flex items-center gap-2">
+              <label className="text-sm text-gray-600 dark:text-gray-400">
+                Bahasa Output:
+              </label>
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                className="flex-1 px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+              >
+                {LANGUAGE_OPTIONS.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
               <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">

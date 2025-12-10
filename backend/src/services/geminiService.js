@@ -131,13 +131,32 @@ const chat = async (message, history = []) => {
   }
 };
 
+// Mapping kode bahasa ke nama bahasa lengkap
+const LANGUAGE_NAMES = {
+  id: "Indonesian (Bahasa Indonesia)",
+  en: "English",
+  es: "Spanish (Español)",
+  fr: "French (Français)",
+  de: "German (Deutsch)",
+  ja: "Japanese (日本語)",
+  zh: "Chinese (中文)",
+  ko: "Korean (한국어)",
+};
+
 /**
  * Generate task description from title
  * @param {string} title - Task title
  * @param {object} projectContext - Project information
+ * @param {string} language - Output language code (default: "id" for Indonesian)
  * @returns {Promise<object>}
  */
-const generateTaskDescription = async (title, projectContext = {}) => {
+const generateTaskDescription = async (
+  title,
+  projectContext = {},
+  language = "id"
+) => {
+  const languageName = LANGUAGE_NAMES[language] || LANGUAGE_NAMES["id"];
+
   const prompt = `You are a project management assistant for agile/scrum teams. Generate a comprehensive task description.
 
 Project Name: ${projectContext.name || "Not specified"}
@@ -151,7 +170,7 @@ Please generate:
 4. Estimated story points (use fibonacci: 1, 2, 3, 5, 8, 13)
 5. Suggested labels (2-3 relevant tags)
 
-IMPORTANT: Respond in the same language as the task title.
+IMPORTANT: You MUST respond ENTIRELY in ${languageName}. All text including description, acceptance criteria, and labels must be in ${languageName}.
 Format your response as JSON with this structure:
 {
   "description": "detailed description here",

@@ -74,14 +74,22 @@ exports.generateTask = async (req, res, next) => {
         .json(formatResponse(false, "AI service is not available"));
     }
 
-    const { title, projectContext } = req.body;
+    const { title, projectContext, language } = req.body;
 
     if (!title) {
       return res.status(400).json(formatResponse(false, "Title is required"));
     }
 
+    // Default language ke Indonesian jika tidak disediakan
+    const outputLanguage = language || "id";
+
     // Check cache first
-    const cacheKey = { feature: "generate_task", title, projectContext };
+    const cacheKey = {
+      feature: "generate_task",
+      title,
+      projectContext,
+      language: outputLanguage,
+    };
     const cached = await AiCache.getCached("generate_task", cacheKey);
 
     if (cached) {
@@ -109,6 +117,7 @@ exports.generateTask = async (req, res, next) => {
       {
         title,
         projectContext,
+        language: outputLanguage,
       },
       {
         priority: aiQueueService.PRIORITY.HIGH,

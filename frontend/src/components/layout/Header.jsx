@@ -12,7 +12,9 @@ import {
   Settings,
   ChevronDown,
   Sparkles,
+  Users,
 } from "lucide-react";
+import { NotificationDropdown } from "../notification";
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -85,6 +87,13 @@ export default function Header() {
               <FolderKanban size={18} />
               <span>Projects</span>
             </Link>
+            <Link
+              to="/teams"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <Users size={18} />
+              <span>Tim</span>
+            </Link>
             {/* AI Dashboard - Admin Only */}
             {user?.role === "admin" && (
               <Link
@@ -99,6 +108,9 @@ export default function Header() {
 
           {/* Right Side */}
           <div className="flex items-center space-x-4">
+            {/* Notification Bell */}
+            <NotificationDropdown />
+
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}

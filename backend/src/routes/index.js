@@ -14,6 +14,9 @@ const labelRoutes = require("./labelRoutes");
 const timeLogRoutes = require("./timeLogRoutes");
 const notificationRoutes = require("./notificationRoutes");
 const aiRoutes = require("./aiRoutes");
+const reportRoutes = require("./reportRoutes");
+const departmentRoutes = require("./departmentRoutes");
+const teamRoutes = require("./teamRoutes");
 
 // Mount routes
 router.use("/auth", authRoutes);
@@ -28,5 +31,8 @@ router.use("/labels", labelRoutes);
 router.use("/time-logs", timeLogRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/ai", aiRoutes);
+router.use("/reports", reportRoutes);
+router.use("/departments", departmentRoutes);
+router.use("/teams", teamRoutes);
 
 module.exports = router;

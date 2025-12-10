@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { projectService } from "../services/projectService";
 import { taskService } from "../services/taskService";
@@ -9,6 +9,7 @@ import Input from "../components/common/Input";
 import KanbanBoard from "../components/kanban/KanbanBoard";
 import { Plus, ArrowLeft, TrendingUp } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSocket } from "../contexts/SocketContext";
 
 export default function KanbanPage() {
   const { projectId } = useParams();
@@ -21,10 +22,32 @@ export default function KanbanPage() {
     priority: "medium",
   });
   const [refreshKey, setRefreshKey] = useState(0);
+  const { joinProject, leaveProject, onTaskUpdate } = useSocket();
 
   useEffect(() => {
     loadProject();
   }, [projectId]);
+
+  // Join project room for real-time updates
+  useEffect(() => {
+    if (projectId) {
+      joinProject(projectId);
+      return () => {
+        leaveProject(projectId);
+      };
+    }
+  }, [projectId, joinProject, leaveProject]);
+
+  // Listen for real-time task updates
+  useEffect(() => {
+    const unsubscribe = onTaskUpdate((data) => {
+      console.log("[Kanban] Real-time task update:", data);
+      // Refresh board when task is updated
+      setRefreshKey((prev) => prev + 1);
+    });
+
+    return unsubscribe;
+  }, [onTaskUpdate]);
 
   const loadProject = async () => {
     try {

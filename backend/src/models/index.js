@@ -31,6 +31,11 @@ const AiUsageLog = require("./AiUsageLog")(sequelize);
 const AiCache = require("./AiCache")(sequelize);
 const AiSetting = require("./AiSetting")(sequelize);
 
+// Team & Organization Models
+const Department = require("./Department")(sequelize);
+const Team = require("./Team")(sequelize);
+const TeamMember = require("./TeamMember")(sequelize);
+
 // Create models object
 const models = {
   User,
@@ -49,6 +54,10 @@ const models = {
   AiUsageLog,
   AiCache,
   AiSetting,
+  // Team & Organization Models
+  Department,
+  Team,
+  TeamMember,
   sequelize,
   Sequelize,
 };

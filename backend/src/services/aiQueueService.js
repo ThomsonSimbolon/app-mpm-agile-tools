@@ -76,7 +76,8 @@ const setupProcessor = () => {
       case "generateTask":
         return geminiService.generateTaskDescription(
           data.title,
-          data.projectContext
+          data.projectContext,
+          data.language
         );
 
       case "suggestSprint":
@@ -158,7 +159,8 @@ const processDirectly = async (type, data) => {
     case "generateTask":
       return geminiService.generateTaskDescription(
         data.title,
-        data.projectContext
+        data.projectContext,
+        data.language
       );
 
     case "suggestSprint":
