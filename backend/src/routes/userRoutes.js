@@ -2,8 +2,13 @@ const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/userController");
 const auth = require("../middleware/auth");
-const roleCheck = require("../middleware/roleCheck");
 const { avatarUpload } = require("../config/multer");
+
+// RBAC Middleware (Enterprise RBAC)
+const {
+  roleCheckAdvanced,
+  requireSystemAdmin,
+} = require("../middleware/roleCheckAdvanced");
 
 router.use(auth);
 
@@ -16,10 +21,16 @@ router.get("/search", userController.search);
 
 /**
  * @route   GET /api/users
- * @desc    Get all users (admin only)
- * @access  Private (Admin)
+ * @desc    Get all users (requires manage_all_users permission)
+ * @access  Private (System Admin)
  */
-router.get("/", roleCheck(["admin"]), userController.list);
+router.get(
+  "/",
+  roleCheckAdvanced({
+    permissions: ["manage_all_users"],
+  }),
+  userController.list
+);
 
 /**
  * @route   GET /api/users/:id
@@ -30,7 +41,7 @@ router.get("/:id", userController.getById);
 
 /**
  * @route   PUT /api/users/:id
- * @desc    Update user profile
+ * @desc    Update user profile (own profile or admin)
  * @access  Private
  */
 router.put("/:id", userController.update);
@@ -55,9 +66,15 @@ router.delete("/:id/avatar", userController.deleteAvatar);
 
 /**
  * @route   DELETE /api/users/:id
- * @desc    Delete user (admin only)
- * @access  Private (Admin)
+ * @desc    Delete user (requires manage_all_users permission)
+ * @access  Private (System Admin)
  */
-router.delete("/:id", roleCheck(["admin"]), userController.delete);
+router.delete(
+  "/:id",
+  roleCheckAdvanced({
+    permissions: ["manage_all_users"],
+  }),
+  userController.delete
+);
 
 module.exports = router;

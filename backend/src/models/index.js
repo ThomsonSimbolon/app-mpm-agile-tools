@@ -36,6 +36,13 @@ const Department = require("./Department")(sequelize);
 const Team = require("./Team")(sequelize);
 const TeamMember = require("./TeamMember")(sequelize);
 
+// RBAC Models (Enterprise Role-Based Access Control)
+const DepartmentMember = require("./DepartmentMember")(sequelize);
+const RbacPermission = require("./RbacPermission")(sequelize);
+const RolePermission = require("./RolePermission")(sequelize);
+const UserRoleAssignment = require("./UserRoleAssignment")(sequelize);
+const PermissionAuditLog = require("./PermissionAuditLog")(sequelize);
+
 // Create models object
 const models = {
   User,
@@ -58,6 +65,12 @@ const models = {
   Department,
   Team,
   TeamMember,
+  // RBAC Models
+  DepartmentMember,
+  RbacPermission,
+  RolePermission,
+  UserRoleAssignment,
+  PermissionAuditLog,
   sequelize,
   Sequelize,
 };

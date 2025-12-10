@@ -1,7 +1,8 @@
 require("dotenv").config();
 const http = require("http");
 const app = require("./src/app");
-const { sequelize } = require("./src/models");
+const models = require("./src/models");
+const { sequelize } = models;
 const { initializeDatabase } = require("./src/utils/dbSync");
 const { initializeSocket } = require("./src/config/socket");
 
@@ -13,6 +14,24 @@ const server = http.createServer(app);
 // Initialize Socket.IO
 initializeSocket(server);
 
+// Initialize RBAC Seeder (optional)
+const initializeRbacSeeder = async () => {
+  // Only run seeder if RBAC_AUTO_SEED is enabled
+  if (process.env.RBAC_AUTO_SEED !== "true") {
+    return { skipped: true };
+  }
+
+  try {
+    const initSeeder = require("./src/seeders/rbacSeeder");
+    const seeder = initSeeder(models);
+    const result = await seeder.seedAll();
+    return result;
+  } catch (error) {
+    console.warn("⚠️ RBAC Seeder warning:", error.message);
+    return { error: error.message };
+  }
+};
+
 // Initialize database and start server
 const startServer = async () => {
   try {
@@ -22,6 +41,14 @@ const startServer = async () => {
     // Log sync status
     if (dbStatus.synced) {
       console.log(`📊 Database sync mode: ${dbStatus.mode}`);
+    }
+
+    // Run RBAC Seeder if enabled
+    const rbacStatus = await initializeRbacSeeder();
+    if (rbacStatus.success) {
+      console.log("🔐 RBAC permissions initialized");
+    } else if (rbacStatus.skipped) {
+      console.log("🔐 RBAC seeder skipped (set RBAC_AUTO_SEED=true to enable)");
     }
 
     // Start server with Socket.IO

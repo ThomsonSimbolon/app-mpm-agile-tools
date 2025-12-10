@@ -18,6 +18,9 @@ const reportRoutes = require("./reportRoutes");
 const departmentRoutes = require("./departmentRoutes");
 const teamRoutes = require("./teamRoutes");
 
+// Enterprise RBAC Routes
+const rbacRoutes = require("./rbacRoutes");
+
 // Mount routes
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
@@ -34,5 +37,8 @@ router.use("/ai", aiRoutes);
 router.use("/reports", reportRoutes);
 router.use("/departments", departmentRoutes);
 router.use("/teams", teamRoutes);
+
+// Enterprise RBAC
+router.use("/rbac", rbacRoutes);
 
 module.exports = router;

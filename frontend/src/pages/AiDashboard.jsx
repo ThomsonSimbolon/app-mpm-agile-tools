@@ -9,6 +9,7 @@ import { useAuth } from "../contexts/AuthContext";
 import { getAiStatus, getAiUsageStats } from "../services/aiService";
 import { AiButton, AiChatPanelStream } from "../components/ai";
 import Card from "../components/common/Card";
+import Header from "../components/layout/Header";
 import toast from "react-hot-toast";
 
 const AiDashboard = () => {
@@ -48,14 +49,17 @@ const AiDashboard = () => {
   // Check if user is admin
   if (user?.role !== "admin") {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
-            Access Denied
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Only administrators can access this page.
-          </p>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Header />
+        <div className="flex items-center justify-center mt-20">
+          <div className="text-center">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white mb-4">
+              Access Denied
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400">
+              Only administrators can access this page.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -100,16 +104,21 @@ const AiDashboard = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <Header />
+        <div className="flex items-center justify-center mt-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <Header />
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Page Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
@@ -437,7 +446,7 @@ const AiDashboard = () => {
             )}
           </Card>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

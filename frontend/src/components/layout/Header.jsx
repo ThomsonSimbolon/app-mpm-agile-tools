@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { useTheme } from "../../contexts/ThemeContext";
+import { useRbac } from "../../contexts/RbacContext";
 import {
   LogOut,
   LayoutDashboard,
@@ -13,12 +14,14 @@ import {
   ChevronDown,
   Sparkles,
   Users,
+  Shield,
 } from "lucide-react";
 import { NotificationDropdown } from "../notification";
 
 export default function Header() {
   const { user, logout } = useAuth();
   const { darkMode, toggleDarkMode } = useTheme();
+  const { isSystemAdmin } = useRbac();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
@@ -102,6 +105,18 @@ export default function Header() {
               >
                 <Sparkles size={18} />
                 <span>AI Dashboard</span>
+              </Link>
+            )}
+            {/* RBAC Dashboard - System Admin Only */}
+            {(isSystemAdmin() ||
+              user?.role === "admin" ||
+              user?.system_role) && (
+              <Link
+                to="/rbac"
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                <Shield size={18} />
+                <span>RBAC</span>
               </Link>
             )}
           </nav>

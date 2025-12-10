@@ -41,14 +41,35 @@ module.exports = (sequelize) => {
         },
       },
       role: {
-        type: DataTypes.ENUM("member", "lead", "admin"),
+        type: DataTypes.ENUM(
+          // Legacy roles
+          "member",
+          "lead",
+          "admin",
+          // New Enterprise RBAC roles
+          "team_admin",
+          "team_lead",
+          "scrum_master",
+          "product_owner",
+          "qa_lead"
+        ),
         defaultValue: "member",
-        comment: "Role dalam tim: member, lead, admin",
+        comment: "Role dalam tim sesuai Enterprise RBAC matrix",
       },
       position: {
         type: DataTypes.STRING(100),
         allowNull: true,
         comment: "Posisi/jabatan dalam tim",
+      },
+      specialization: {
+        type: DataTypes.STRING(100),
+        allowNull: true,
+        comment: "Spesialisasi: frontend, backend, devops, qa, etc.",
+      },
+      capacity_percentage: {
+        type: DataTypes.INTEGER,
+        defaultValue: 100,
+        comment: "Kapasitas kerja dalam persen (0-100)",
       },
       joined_at: {
         type: DataTypes.DATE,
