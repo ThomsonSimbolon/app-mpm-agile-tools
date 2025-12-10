@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { projectService } from '../services/projectService';
-import { taskService } from '../services/taskService';
-import Header from '../components/layout/Header';
-import Card from '../components/common/Card';
-import Button from '../components/common/Button';
-import Input from '../components/common/Input';
-import KanbanBoard from '../components/kanban/KanbanBoard';
-import { Plus, ArrowLeft, TrendingUp } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { projectService } from "../services/projectService";
+import { taskService } from "../services/taskService";
+import Header from "../components/layout/Header";
+import Card from "../components/common/Card";
+import Button from "../components/common/Button";
+import Input from "../components/common/Input";
+import KanbanBoard from "../components/kanban/KanbanBoard";
+import { Plus, ArrowLeft, TrendingUp } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function KanbanPage() {
   const { projectId } = useParams();
@@ -16,9 +16,9 @@ export default function KanbanPage() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    priority: 'medium'
+    title: "",
+    description: "",
+    priority: "medium",
   });
   const [refreshKey, setRefreshKey] = useState(0);
 
@@ -33,7 +33,7 @@ export default function KanbanPage() {
         setProject(result.data.project);
       }
     } catch (error) {
-      toast.error('Failed to load project');
+      toast.error("Failed to load project");
     } finally {
       setLoading(false);
     }
@@ -44,13 +44,13 @@ export default function KanbanPage() {
     try {
       const result = await taskService.create(projectId, formData);
       if (result.success) {
-        toast.success('Task created successfully!');
+        toast.success("Task created successfully!");
         setShowCreateModal(false);
-        setFormData({ title: '', description: '', priority: 'medium' });
-        setRefreshKey(prev => prev + 1); // Force refresh
+        setFormData({ title: "", description: "", priority: "medium" });
+        setRefreshKey((prev) => prev + 1); // Force refresh
       }
     } catch (error) {
-      toast.error('Failed to create task');
+      toast.error("Failed to create task");
     }
   };
 
@@ -68,7 +68,7 @@ export default function KanbanPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
-      
+
       <main className="max-w-full px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
@@ -77,19 +77,25 @@ export default function KanbanPage() {
               {project?.name}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-1">
-              {project?.description || 'No description'}
+              {project?.description || "No description"}
             </p>
           </div>
-          
+
           <div className="flex gap-2">
             <Link to="/projects">
-              <Button variant="secondary" className="flex items-center space-x-2">
+              <Button
+                variant="secondary"
+                className="flex items-center space-x-2"
+              >
                 <ArrowLeft size={20} />
                 <span>Back</span>
               </Button>
             </Link>
             <Link to={`/projects/${projectId}/sprints`}>
-              <Button variant="secondary" className="flex items-center space-x-2">
+              <Button
+                variant="secondary"
+                className="flex items-center space-x-2"
+              >
                 <TrendingUp size={20} />
                 <span>Sprints</span>
               </Button>
@@ -119,7 +125,9 @@ export default function KanbanPage() {
                 <Input
                   label="Task Title"
                   value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, title: e.target.value })
+                  }
                   required
                   placeholder="Enter task title"
                 />
@@ -129,7 +137,9 @@ export default function KanbanPage() {
                   </label>
                   <textarea
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     rows={3}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="Optional task description"
@@ -141,7 +151,9 @@ export default function KanbanPage() {
                   </label>
                   <select
                     value={formData.priority}
-                    onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, priority: e.target.value })
+                    }
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                   >
                     <option value="low">Low</option>

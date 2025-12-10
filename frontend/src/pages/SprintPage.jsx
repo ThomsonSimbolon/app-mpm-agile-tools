@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { sprintService } from '../services/sprintService';
-import { projectService } from '../services/projectService';
-import Header from '../components/layout/Header';
-import Card from '../components/common/Card';
-import Button from '../components/common/Button';
-import Input from '../components/common/Input';
-import { Plus, ArrowLeft, Play, CheckCircle, TrendingUp } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { sprintService } from "../services/sprintService";
+import { projectService } from "../services/projectService";
+import Header from "../components/layout/Header";
+import Card from "../components/common/Card";
+import Button from "../components/common/Button";
+import Input from "../components/common/Input";
+import { Plus, ArrowLeft, Play, CheckCircle, TrendingUp } from "lucide-react";
+import toast from "react-hot-toast";
 
 export default function SprintPage() {
   const { projectId } = useParams();
@@ -16,10 +16,10 @@ export default function SprintPage() {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
-    goal: '',
-    start_date: '',
-    end_date: ''
+    name: "",
+    goal: "",
+    start_date: "",
+    end_date: "",
   });
 
   useEffect(() => {
@@ -30,7 +30,7 @@ export default function SprintPage() {
     try {
       const [projectResult, sprintsResult] = await Promise.all([
         projectService.getById(projectId),
-        sprintService.getByProject(projectId)
+        sprintService.getByProject(projectId),
       ]);
 
       if (projectResult.success) {
@@ -40,7 +40,7 @@ export default function SprintPage() {
         setSprints(sprintsResult.data.sprints || []);
       }
     } catch (error) {
-      toast.error('Failed to load sprints');
+      toast.error("Failed to load sprints");
     } finally {
       setLoading(false);
     }
@@ -51,13 +51,13 @@ export default function SprintPage() {
     try {
       const result = await sprintService.create(projectId, formData);
       if (result.success) {
-        toast.success('Sprint created successfully!');
+        toast.success("Sprint created successfully!");
         setShowCreateModal(false);
-        setFormData({ name: '', goal: '', start_date: '', end_date: '' });
+        setFormData({ name: "", goal: "", start_date: "", end_date: "" });
         loadData();
       }
     } catch (error) {
-      toast.error('Failed to create sprint');
+      toast.error("Failed to create sprint");
     }
   };
 
@@ -65,11 +65,11 @@ export default function SprintPage() {
     try {
       const result = await sprintService.start(sprintId);
       if (result.success) {
-        toast.success('Sprint started!');
+        toast.success("Sprint started!");
         loadData();
       }
     } catch (error) {
-      toast.error('Failed to start sprint');
+      toast.error("Failed to start sprint");
     }
   };
 
@@ -77,18 +77,18 @@ export default function SprintPage() {
     try {
       const result = await sprintService.complete(sprintId);
       if (result.success) {
-        toast.success('Sprint completed!');
+        toast.success("Sprint completed!");
         loadData();
       }
     } catch (error) {
-      toast.error('Failed to complete sprint');
+      toast.error("Failed to complete sprint");
     }
   };
 
   const statusColors = {
-    planning: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
-    active: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+    planning: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300",
+    active: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
+    completed: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
   };
 
   if (loading) {
@@ -105,35 +105,38 @@ export default function SprintPage() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <Header />
-      
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Sprints - {project?.name}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Manage your sprint cycles
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-3">
             <Link to={`/projects/${projectId}/kanban`}>
-              <Button variant="secondary" size="sm" className="flex items-center space-x-2">
-                <ArrowLeft size={16} />
+              <Button
+                variant="secondary"
+                className="flex items-center space-x-2"
+              >
+                <ArrowLeft size={20} />
                 <span>Back to Kanban</span>
               </Button>
             </Link>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Sprints - {project?.name}
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Manage your sprint cycles
-              </p>
-            </div>
+            <Button
+              variant="primary"
+              onClick={() => setShowCreateModal(true)}
+              className="flex items-center space-x-2"
+            >
+              <Plus size={20} />
+              <span>New Sprint</span>
+            </Button>
           </div>
-          
-          <Button
-            variant="primary"
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center space-x-2"
-          >
-            <Plus size={20} />
-            <span>New Sprint</span>
-          </Button>
         </div>
 
         {/* Sprints List */}
@@ -166,11 +169,15 @@ export default function SprintPage() {
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                         {sprint.name}
                       </h3>
-                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${statusColors[sprint.status]}`}>
+                      <span
+                        className={`px-3 py-1 text-xs font-medium rounded-full ${
+                          statusColors[sprint.status]
+                        }`}
+                      >
                         {sprint.status}
                       </span>
                     </div>
-                    
+
                     {sprint.goal && (
                       <p className="text-gray-600 dark:text-gray-400 mb-3">
                         Goal: {sprint.goal}
@@ -179,7 +186,8 @@ export default function SprintPage() {
 
                     <div className="flex items-center gap-6 text-sm text-gray-500 dark:text-gray-400">
                       <span>
-                        Start: {new Date(sprint.start_date).toLocaleDateString()}
+                        Start:{" "}
+                        {new Date(sprint.start_date).toLocaleDateString()}
                       </span>
                       <span>
                         End: {new Date(sprint.end_date).toLocaleDateString()}
@@ -188,7 +196,7 @@ export default function SprintPage() {
                   </div>
 
                   <div className="flex gap-2">
-                    {sprint.status === 'planning' && (
+                    {sprint.status === "planning" && (
                       <Button
                         variant="primary"
                         size="sm"
@@ -199,7 +207,7 @@ export default function SprintPage() {
                         <span>Start</span>
                       </Button>
                     )}
-                    {sprint.status === 'active' && (
+                    {sprint.status === "active" && (
                       <Button
                         variant="success"
                         size="sm"
@@ -228,7 +236,9 @@ export default function SprintPage() {
                 <Input
                   label="Sprint Name"
                   value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
                   required
                   placeholder="e.g., Sprint 1"
                 />
@@ -238,7 +248,9 @@ export default function SprintPage() {
                   </label>
                   <textarea
                     value={formData.goal}
-                    onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, goal: e.target.value })
+                    }
                     rows={2}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500"
                     placeholder="Sprint goal"
@@ -248,14 +260,18 @@ export default function SprintPage() {
                   label="Start Date"
                   type="date"
                   value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, start_date: e.target.value })
+                  }
                   required
                 />
                 <Input
                   label="End Date"
                   type="date"
                   value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, end_date: e.target.value })
+                  }
                   required
                 />
                 <div className="flex space-x-3">

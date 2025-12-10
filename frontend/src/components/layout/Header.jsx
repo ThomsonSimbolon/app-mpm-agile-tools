@@ -1,8 +1,17 @@
-import { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { useTheme } from '../../contexts/ThemeContext';
-import { LogOut, LayoutDashboard, FolderKanban, User, Moon, Sun, Settings, ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
+import {
+  LogOut,
+  LayoutDashboard,
+  FolderKanban,
+  User,
+  Moon,
+  Sun,
+  Settings,
+  ChevronDown,
+} from "lucide-react";
 
 export default function Header() {
   const { user, logout } = useAuth();
@@ -14,7 +23,7 @@ export default function Header() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   // Click outside to close
@@ -25,8 +34,8 @@ export default function Header() {
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Hover handlers with delay for better UX
@@ -42,15 +51,15 @@ export default function Header() {
   };
 
   return (
-    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 relative z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link to="/dashboard" className="flex items-center space-x-2">
-              <img 
-                src="/images/logo/logo-mpm-agile-tools.png" 
-                alt="MPM Agile Tools Logo" 
+              <img
+                src="/images/logo/logo-mpm-agile-tools.png"
+                alt="MPM Agile Tools Logo"
                 className="h-8 w-auto object-contain"
               />
               <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -83,7 +92,7 @@ export default function Header() {
             <button
               onClick={toggleDarkMode}
               className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-              title={darkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+              title={darkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
             >
               {darkMode ? (
                 <Sun size={20} className="text-yellow-500" />
@@ -93,7 +102,7 @@ export default function Header() {
             </button>
 
             {/* Profile Dropdown */}
-            <div 
+            <div
               ref={dropdownRef}
               className="relative"
               onMouseEnter={handleMouseEnter}
@@ -106,28 +115,35 @@ export default function Header() {
               >
                 {user?.avatar_url ? (
                   <img
-                    src={`${import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000'}/${user.avatar_url.startsWith('/') ? user.avatar_url.substring(1) : user.avatar_url}`}
+                    src={`${
+                      import.meta.env.VITE_API_URL?.replace("/api", "") ||
+                      "http://localhost:5000"
+                    }/${
+                      user.avatar_url.startsWith("/")
+                        ? user.avatar_url.substring(1)
+                        : user.avatar_url
+                    }`}
                     alt={user.full_name}
                     className="w-8 h-8 rounded-full object-cover border-2 border-primary-600"
                     onError={(e) => {
-                      e.target.style.display = 'none';
-                      e.target.nextElementSibling.style.display = 'flex';
+                      e.target.style.display = "none";
+                      e.target.nextElementSibling.style.display = "flex";
                     }}
                   />
                 ) : (
                   <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-semibold">
-                      {user?.full_name?.charAt(0).toUpperCase() || 'U'}
+                      {user?.full_name?.charAt(0).toUpperCase() || "U"}
                     </span>
                   </div>
                 )}
                 <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                   {user?.full_name}
                 </span>
-                <ChevronDown 
-                  size={16} 
+                <ChevronDown
+                  size={16}
                   className={`text-gray-500 transition-transform duration-200 ${
-                    isDropdownOpen ? 'rotate-180' : ''
+                    isDropdownOpen ? "rotate-180" : ""
                   }`}
                 />
               </button>
@@ -158,7 +174,7 @@ export default function Header() {
                       <User size={16} />
                       <span>My Profile</span>
                     </Link>
-                    
+
                     <Link
                       to="/settings"
                       className="flex items-center space-x-2 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
