@@ -1,15 +1,16 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './contexts/AuthContext';
-import { ThemeProvider } from './contexts/ThemeContext';
-import { Toaster } from 'react-hot-toast';
-import PrivateRoute from './components/auth/PrivateRoute';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import Projects from './pages/Projects';
-import KanbanPage from './pages/KanbanPage';
-import SprintPage from './pages/SprintPage';
-import Profile from './pages/Profile';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
+import { Toaster } from "react-hot-toast";
+import PrivateRoute from "./components/auth/PrivateRoute";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Dashboard from "./pages/Dashboard";
+import Projects from "./pages/Projects";
+import KanbanPage from "./pages/KanbanPage";
+import SprintPage from "./pages/SprintPage";
+import Profile from "./pages/Profile";
+import AiDashboard from "./pages/AiDashboard";
 
 function App() {
   return (
@@ -71,10 +72,18 @@ function App() {
                   </PrivateRoute>
                 }
               />
+              <Route
+                path="/ai-dashboard"
+                element={
+                  <PrivateRoute>
+                    <AiDashboard />
+                  </PrivateRoute>
+                }
+              />
 
               {/* Redirect root to dashboard */}
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
-              
+
               {/* 404 Fallback */}
               <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
@@ -85,21 +94,21 @@ function App() {
               toastOptions={{
                 duration: 3000,
                 style: {
-                  background: '#363636',
-                  color: '#fff',
+                  background: "#363636",
+                  color: "#fff",
                 },
                 success: {
                   duration: 3000,
                   iconTheme: {
-                    primary: '#10b981',
-                    secondary: '#fff',
+                    primary: "#10b981",
+                    secondary: "#fff",
                   },
                 },
                 error: {
                   duration: 4000,
                   iconTheme: {
-                    primary: '#ef4444',
-                    secondary: '#fff',
+                    primary: "#ef4444",
+                    secondary: "#fff",
                   },
                 },
               }}

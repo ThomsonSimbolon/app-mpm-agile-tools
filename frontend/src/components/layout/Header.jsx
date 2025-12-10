@@ -11,6 +11,7 @@ import {
   Sun,
   Settings,
   ChevronDown,
+  Sparkles,
 } from "lucide-react";
 
 export default function Header() {
@@ -84,6 +85,16 @@ export default function Header() {
               <FolderKanban size={18} />
               <span>Projects</span>
             </Link>
+            {/* AI Dashboard - Admin Only */}
+            {user?.role === "admin" && (
+              <Link
+                to="/ai-dashboard"
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors"
+              >
+                <Sparkles size={18} />
+                <span>AI Dashboard</span>
+              </Link>
+            )}
           </nav>
 
           {/* Right Side */}

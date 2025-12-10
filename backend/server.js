@@ -1,29 +1,47 @@
-require('dotenv').config();
-const app = require('./src/app');
-const { sequelize } = require('./src/models');
+require("dotenv").config();
+const app = require("./src/app");
+const { sequelize } = require("./src/models");
+const { initializeDatabase } = require("./src/utils/dbSync");
 
 const PORT = process.env.PORT || 5000;
 
-// Test database connection
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log('✅ Database connection established successfully.');
-    
+// Initialize database and start server
+const startServer = async () => {
+  try {
+    // Initialize database (connection + optional sync based on DB_AUTO_SYNC)
+    const dbStatus = await initializeDatabase(sequelize);
+
+    // Log sync status
+    if (dbStatus.synced) {
+      console.log(`📊 Database sync mode: ${dbStatus.mode}`);
+    }
+
     // Start server
     app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
-      console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`🔗 API URL: http://localhost:${PORT}`);
+      console.log("");
+      console.log("🚀 Server is running!");
+      console.log(`   Port: ${PORT}`);
+      console.log(`   Environment: ${process.env.NODE_ENV || "development"}`);
+      console.log(`   API URL: http://localhost:${PORT}/api`);
+      console.log("");
     });
-  })
-  .catch((err) => {
-    console.error('❌ Unable to connect to the database:', err);
+  } catch (err) {
+    console.error("❌ Failed to start server:", err.message);
     process.exit(1);
-  });
+  }
+};
+
+// Start the server
+startServer();
 
 // Handle unhandled promise rejections
-process.on('unhandledRejection', (err) => {
-  console.error('❌ Unhandled Promise Rejection:', err);
+process.on("unhandledRejection", (err) => {
+  console.error("❌ Unhandled Promise Rejection:", err);
+  process.exit(1);
+});
+
+// Handle uncaught exceptions
+process.on("uncaughtException", (err) => {
+  console.error("❌ Uncaught Exception:", err);
   process.exit(1);
 });
