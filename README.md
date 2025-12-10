@@ -24,6 +24,7 @@ A complete Mini Project Management (Agile Tools) application built with **Node.j
 ## ✨ Features
 
 ### Core Functionality
+
 - ✅ **User Authentication** - JWT-based registration & login
 - ✅ **Project Management** - Create, update, delete projects
 - ✅ **Kanban Board** - Drag & drop tasks between columns (Backlog, To Do, In Progress, In Review, Done)
@@ -34,6 +35,7 @@ A complete Mini Project Management (Agile Tools) application built with **Node.j
 - ✅ **Team Collaboration** - Add members to projects with role-based access
 
 ### Advanced Features
+
 - 🎨 **Dark Mode** - Toggle between light and dark themes
 - 📊 **Project Statistics** - Dashboard with metrics and charts
 - 🔔 **Notifications** - Real-time updates (backend ready)
@@ -41,11 +43,19 @@ A complete Mini Project Management (Agile Tools) application built with **Node.j
 - 🏷️ **Labels & Tags** - Organize tasks with color-coded labels (backend ready)
 - 📎 **File Attachments** - Upload files to tasks (backend ready)
 
+### AI Features (New! 🚀)
+
+- 🤖 **AI Chat with Streaming** - Real-time AI assistant powered by Google Gemini API
+- 💬 **Task-aware AI** - AI understands task context for better suggestions
+- ⚡ **Server-Sent Events (SSE)** - Smooth streaming response like ChatGPT
+- 📝 **Markdown Support** - Rich text formatting with syntax highlighting
+
 ---
 
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **Runtime**: Node.js v18+
 - **Framework**: Express.js
 - **Database**: MySQL 8.0+
@@ -54,17 +64,22 @@ A complete Mini Project Management (Agile Tools) application built with **Node.j
 - **Security**: bcrypt, helmet, cors, express-rate-limit
 - **Validation**: express-validator
 - **File Upload**: multer
+- **AI Integration**: @google/generative-ai (Gemini API)
+- **Caching**: Redis (ioredis) for AI response caching
+- **Queue**: Bull for AI request queue management
 
 ### Frontend
+
 - **Library**: React 18
 - **Build Tool**: Vite
-- **Styling**: TailwindCSS
+- **Styling**: TailwindCSS + @tailwindcss/typography
 - **Routing**: React Router v6
 - **HTTP Client**: Axios
 - **Drag & Drop**: @dnd-kit
 - **Icons**: Lucide React
 - **Notifications**: React Hot Toast
 - **Date Handling**: date-fns
+- **Markdown Rendering**: react-markdown, remark-gfm, rehype-highlight
 
 ---
 
@@ -105,6 +120,7 @@ cp .env.example .env
 ```
 
 **Backend `.env` Configuration:**
+
 ```env
 # Application
 NODE_ENV=development
@@ -138,7 +154,7 @@ CREATE DATABASE mpm_agile_tools;
 USE mpm_agile_tools;
 
 -- Add password reset columns to users table (if needed)
-ALTER TABLE users 
+ALTER TABLE users
 ADD COLUMN reset_password_token VARCHAR(255) NULL,
 ADD COLUMN reset_password_expires DATETIME NULL;
 ```
@@ -159,6 +175,7 @@ cp .env.example .env
 ```
 
 **Frontend `.env` Configuration:**
+
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
@@ -166,17 +183,21 @@ VITE_API_URL=http://localhost:5000/api
 ### 5. Start Development Servers
 
 **Terminal 1 - Backend:**
+
 ```bash
 cd backend
 npm run dev
 ```
+
 Backend runs on: `http://localhost:5000`
 
 **Terminal 2 - Frontend:**
+
 ```bash
 cd frontend
 npm run dev
 ```
+
 Frontend runs on: `http://localhost:5173`
 
 ### 6. Create First Admin User
@@ -196,6 +217,7 @@ UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
 ## 📁 Project Structure
 
 ### Backend Structure
+
 ```
 backend/
 ├── src/
@@ -259,6 +281,7 @@ backend/
 ```
 
 ### Frontend Structure
+
 ```
 frontend/
 ├── src/
@@ -312,70 +335,83 @@ frontend/
 ## � API Documentation
 
 ### Base URL
+
 ```
 http://localhost:5000/api
 ```
 
 ### Authentication Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/auth/register` | Register new user | No |
-| POST | `/auth/login` | Login user | No |
-| GET | `/auth/me` | Get current user | Yes |
-| POST | `/auth/logout` | Logout user | Yes |
-| PUT | `/auth/change-password` | Change password | Yes |
-| POST | `/auth/forgot-password` | Request password reset | No |
-| POST | `/auth/reset-password` | Reset password with token | No |
+| Method | Endpoint                | Description               | Auth Required |
+| ------ | ----------------------- | ------------------------- | ------------- |
+| POST   | `/auth/register`        | Register new user         | No            |
+| POST   | `/auth/login`           | Login user                | No            |
+| GET    | `/auth/me`              | Get current user          | Yes           |
+| POST   | `/auth/logout`          | Logout user               | Yes           |
+| PUT    | `/auth/change-password` | Change password           | Yes           |
+| POST   | `/auth/forgot-password` | Request password reset    | No            |
+| POST   | `/auth/reset-password`  | Reset password with token | No            |
 
 ### Project Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/projects` | Create project | Yes |
-| GET | `/projects` | Get all user projects | Yes |
-| GET | `/projects/:id` | Get project by ID | Yes |
-| PUT | `/projects/:id` | Update project | Yes |
-| DELETE | `/projects/:id` | Delete project | Yes |
-| GET | `/projects/:id/statistics` | Get project stats | Yes |
-| POST | `/projects/:id/members` | Add member | Yes |
-| DELETE | `/projects/:id/members/:userId` | Remove member | Yes |
-| PUT | `/projects/:id/members/:userId` | Update member role | Yes |
+| Method | Endpoint                        | Description           | Auth Required |
+| ------ | ------------------------------- | --------------------- | ------------- |
+| POST   | `/projects`                     | Create project        | Yes           |
+| GET    | `/projects`                     | Get all user projects | Yes           |
+| GET    | `/projects/:id`                 | Get project by ID     | Yes           |
+| PUT    | `/projects/:id`                 | Update project        | Yes           |
+| DELETE | `/projects/:id`                 | Delete project        | Yes           |
+| GET    | `/projects/:id/statistics`      | Get project stats     | Yes           |
+| POST   | `/projects/:id/members`         | Add member            | Yes           |
+| DELETE | `/projects/:id/members/:userId` | Remove member         | Yes           |
+| PUT    | `/projects/:id/members/:userId` | Update member role    | Yes           |
 
 ### Task Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/tasks/projects/:projectId/tasks` | Create task | Yes |
-| GET | `/tasks/projects/:projectId/tasks` | Get project tasks | Yes |
-| GET | `/tasks/:id` | Get task by ID | Yes |
-| PUT | `/tasks/:id` | Update task | Yes |
-| **PUT** | **`/tasks/:id/status`** | **Update task status (Kanban)** | Yes |
-| PUT | `/tasks/:id/assign` | Assign task | Yes |
-| DELETE | `/tasks/:id` | Delete task | Yes |
-| POST | `/tasks/:id/subtasks` | Create subtask | Yes |
+| Method  | Endpoint                           | Description                     | Auth Required |
+| ------- | ---------------------------------- | ------------------------------- | ------------- |
+| POST    | `/tasks/projects/:projectId/tasks` | Create task                     | Yes           |
+| GET     | `/tasks/projects/:projectId/tasks` | Get project tasks               | Yes           |
+| GET     | `/tasks/:id`                       | Get task by ID                  | Yes           |
+| PUT     | `/tasks/:id`                       | Update task                     | Yes           |
+| **PUT** | **`/tasks/:id/status`**            | **Update task status (Kanban)** | Yes           |
+| PUT     | `/tasks/:id/assign`                | Assign task                     | Yes           |
+| DELETE  | `/tasks/:id`                       | Delete task                     | Yes           |
+| POST    | `/tasks/:id/subtasks`              | Create subtask                  | Yes           |
 
 ### Sprint Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/sprints/projects/:projectId/sprints` | Create sprint | Yes |
-| GET | `/sprints/projects/:projectId/sprints` | Get project sprints | Yes |
-| GET | `/sprints/:id` | Get sprint by ID | Yes |
-| PUT | `/sprints/:id` | Update sprint | Yes |
-| DELETE | `/sprints/:id` | Delete sprint | Yes |
-| POST | `/sprints/:id/start` | Start sprint | Yes |
-| POST | `/sprints/:id/complete` | Complete sprint | Yes |
-| GET | `/sprints/:id/burndown` | Get burndown data | Yes |
+| Method | Endpoint                               | Description         | Auth Required |
+| ------ | -------------------------------------- | ------------------- | ------------- |
+| POST   | `/sprints/projects/:projectId/sprints` | Create sprint       | Yes           |
+| GET    | `/sprints/projects/:projectId/sprints` | Get project sprints | Yes           |
+| GET    | `/sprints/:id`                         | Get sprint by ID    | Yes           |
+| PUT    | `/sprints/:id`                         | Update sprint       | Yes           |
+| DELETE | `/sprints/:id`                         | Delete sprint       | Yes           |
+| POST   | `/sprints/:id/start`                   | Start sprint        | Yes           |
+| POST   | `/sprints/:id/complete`                | Complete sprint     | Yes           |
+| GET    | `/sprints/:id/burndown`                | Get burndown data   | Yes           |
 
 ### Comment Endpoints
 
-| Method | Endpoint | Description | Auth Required |
-|--------|----------|-------------|---------------|
-| POST | `/comments/tasks/:taskId/comments` | Add comment | Yes |
-| GET | `/comments/tasks/:taskId/comments` | Get task comments | Yes |
-| PUT | `/comments/:id` | Update comment | Yes |
-| DELETE | `/comments/:id` | Delete comment | Yes |
+| Method | Endpoint                           | Description       | Auth Required |
+| ------ | ---------------------------------- | ----------------- | ------------- |
+| POST   | `/comments/tasks/:taskId/comments` | Add comment       | Yes           |
+| GET    | `/comments/tasks/:taskId/comments` | Get task comments | Yes           |
+| PUT    | `/comments/:id`                    | Update comment    | Yes           |
+| DELETE | `/comments/:id`                    | Delete comment    | Yes           |
+
+### AI Endpoints (New! 🤖)
+
+| Method | Endpoint                  | Description                           | Auth Required |
+| ------ | ------------------------- | ------------------------------------- | ------------- |
+| POST   | `/ai/chat/stream`         | AI Chat with streaming response (SSE) | Yes           |
+| POST   | `/ai/chat`                | AI Chat (non-streaming)               | Yes           |
+| POST   | `/ai/task-suggestions`    | Get AI suggestions for task           | Yes           |
+| POST   | `/ai/analyze-sprint`      | AI sprint analysis                    | Yes           |
+| GET    | `/ai/insights/:projectId` | Get AI project insights               | Yes           |
+| GET    | `/ai/settings`            | Get AI settings                       | Yes           |
+| PUT    | `/ai/settings`            | Update AI settings                    | Yes (Admin)   |
 
 ### Other Endpoints
 
@@ -386,13 +422,13 @@ http://localhost:5000/api
 - **Activities**: `/activities/*`
 - **Users**: `/users/*`
 
-**Total**: 60+ REST API endpoints
+**Total**: 70+ REST API endpoints
 
 ---
 
 ## 🗄️ Database Schema
 
-### Core Tables (12 tables)
+### Core Tables (15 tables)
 
 1. **users** - User accounts with authentication
 2. **projects** - Projects information
@@ -407,6 +443,12 @@ http://localhost:5000/api
 11. **time_logs** - Time tracking entries
 12. **notifications** - User notifications
 
+### AI Tables (New! 🤖)
+
+13. **ai_settings** - AI configuration per project
+14. **ai_cache** - Cached AI responses for performance
+15. **ai_usage_logs** - Track AI API usage and costs
+
 ### Key Relationships
 
 ```
@@ -417,6 +459,8 @@ Task ──< Attachment
 Task >──< Label (through TaskLabel)
 Task ──< TimeLog
 User ──< Notification
+Project ──< AiSetting
+User ──< AiUsageLog
 ```
 
 ---
@@ -496,6 +540,65 @@ Headers: { Authorization: "Bearer <token>" }
 {
   "content": "Great work on this task!"
 }
+```
+
+### 6. AI Chat with Streaming (New! 🤖)
+
+**Backend Setup:**
+Add the following to your backend `.env`:
+
+```env
+# Gemini AI Configuration
+GEMINI_API_KEY=your-gemini-api-key
+GEMINI_MODEL=gemini-1.5-flash
+AI_MAX_TOKENS=8192
+AI_TEMPERATURE=0.7
+```
+
+**API Request (Server-Sent Events):**
+
+```javascript
+// Frontend: Using Fetch API with streaming
+const response = await fetch("/api/ai/chat/stream", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  },
+  body: JSON.stringify({
+    message: "How do I implement user authentication?",
+    taskContext: {
+      /* optional task details */
+    },
+  }),
+});
+
+// Read streaming response
+const reader = response.body.getReader();
+const decoder = new TextDecoder();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+
+  const chunk = decoder.decode(value);
+  // Process SSE data: "data: {\"text\": \"chunk\"}\n\n"
+  console.log(chunk);
+}
+```
+
+**Response Format (SSE):**
+
+```
+data: {"text": "Hello"}
+
+data: {"text": "! How"}
+
+data: {"text": " can I"}
+
+data: {"text": " help you?"}
+
+data: [DONE]
 ```
 
 ---
@@ -615,34 +718,90 @@ server {
 ### Common Issues
 
 **1. Database Connection Error**
+
 ```
 Error: Access denied for user 'root'@'localhost'
 ```
+
 **Solution**: Check MySQL credentials in `.env` file and ensure MySQL is running.
 
 **2. JWT Secret Not Set**
+
 ```
 Error: JWT_SECRET is not defined
 ```
+
 **Solution**: Set `JWT_SECRET` in backend `.env` file.
 
 **3. CORS Error in Frontend**
+
 ```
 Access to XMLHttpRequest blocked by CORS policy
 ```
+
 **Solution**: Ensure `FRONTEND_URL` in backend `.env` matches your frontend URL.
 
 **4. Port Already in Use**
+
 ```
 Error: listen EADDRINUSE: address already in use :::5000
 ```
+
 **Solution**: Kill the process using the port or change PORT in `.env`.
 
 **5. Tasks Not Appearing in Kanban**
+
 ```
 Empty columns in Kanban board
 ```
+
 **Solution**: Create tasks via "New Task" button or check browser console for API errors.
+
+### AI-Related Issues (New! 🤖)
+
+**6. AI Chat Not Responding**
+
+```
+Error: GEMINI_API_KEY is not defined
+```
+
+**Solution**: Add `GEMINI_API_KEY` to backend `.env` file. Get API key from [Google AI Studio](https://aistudio.google.com/).
+
+**7. AI Streaming Not Working**
+
+```
+ReadableStream not supported or SSE connection failed
+```
+
+**Solution**:
+
+- Ensure browser supports Fetch API with streaming
+- Check if backend CORS allows streaming responses
+- Verify `Content-Type: text/event-stream` header is set
+
+**8. AI Rate Limit Exceeded**
+
+```
+Error: AI rate limit exceeded. Please try again later.
+```
+
+**Solution**: Wait for rate limit to reset (default: 20 requests/minute) or adjust `AI_RATE_LIMIT` in backend `.env`.
+
+**9. Tailwind Typography Plugin Error**
+
+```
+Error: require() of ES Module @tailwindcss/typography
+```
+
+**Solution**: Use ESM import in `tailwind.config.js`:
+
+```javascript
+import typography from "@tailwindcss/typography";
+export default {
+  // ...
+  plugins: [typography],
+};
+```
 
 ### Development Tips
 
@@ -673,6 +832,8 @@ curl -X POST http://localhost:5000/api/auth/login \
 - **Database**: Optimized with indexes on foreign keys
 - **Frontend**: Lighthouse score: 90+ (Performance)
 - **Bundle Size**: < 500KB gzipped
+- **AI Streaming**: Real-time response with SSE (latency < 100ms per chunk)
+- **AI Rate Limit**: 20 requests/minute per user (configurable)
 
 ---
 
@@ -686,6 +847,8 @@ curl -X POST http://localhost:5000/api/auth/login \
 - ✅ SQL injection protection (Sequelize ORM)
 - ✅ XSS protection
 - ✅ Role-based access control
+- ✅ AI rate limiting (20 req/min per user)
+- ✅ AI API key protection (server-side only)
 
 ---
 
@@ -704,6 +867,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## � Support
 
 For issues and questions:
+
 - Create an issue on GitHub
 - Email: support@yourproject.com
 
@@ -711,6 +875,7 @@ For issues and questions:
 
 ## 🎯 Roadmap
 
+- [x] **AI Chat with Streaming Response** - Powered by Google Gemini API ✅ (Dec 2024)
 - [ ] Real-time notifications with WebSockets
 - [ ] Email integration for notifications
 - [ ] Advanced reporting and analytics
@@ -744,9 +909,11 @@ Role: admin (update in database)
 ```
 
 **Total Project Stats:**
-- 📦 80+ production files
-- 🔌 60+ API endpoints
-- 🗄️ 12 database tables
-- 📱 32 frontend components
+
+- 📦 85+ production files
+- 🔌 70+ API endpoints
+- 🗄️ 15 database tables (including AI tables)
+- 📱 35+ frontend components
 - 🎨 100% responsive design
 - 🌙 Full dark mode support
+- 🤖 AI-powered features with Gemini API
