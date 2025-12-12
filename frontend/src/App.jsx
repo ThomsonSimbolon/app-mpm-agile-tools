@@ -18,6 +18,11 @@ import ReportDashboard from "./pages/ReportDashboard";
 import TeamManagement from "./pages/TeamManagement";
 import RbacDashboard from "./pages/RbacDashboard";
 import UserRoleManagement from "./pages/UserRoleManagement";
+import UsersManagement from "./pages/UsersManagement";
+import ApprovalDashboard from "./pages/ApprovalDashboard";
+import LeaveManagement from "./pages/LeaveManagement";
+import CalendarPage from "./pages/CalendarPage";
+import GanttPage from "./pages/GanttPage";
 
 function App() {
   return (
@@ -120,6 +125,52 @@ function App() {
                     element={
                       <PrivateRoute>
                         <UserRoleManagement />
+                      </PrivateRoute>
+                    }
+                  />
+
+                  {/* Admin Management Routes */}
+                  <Route
+                    path="/admin/users"
+                    element={
+                      <PrivateRoute>
+                        <UsersManagement />
+                      </PrivateRoute>
+                    }
+                  />
+
+                  {/* Approval & Leave Routes */}
+                  <Route
+                    path="/approvals"
+                    element={
+                      <PrivateRoute>
+                        <ApprovalDashboard />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/leaves"
+                    element={
+                      <PrivateRoute>
+                        <LeaveManagement />
+                      </PrivateRoute>
+                    }
+                  />
+
+                  {/* Calendar & Scheduling Routes */}
+                  <Route
+                    path="/calendar"
+                    element={
+                      <PrivateRoute>
+                        <CalendarPage />
+                      </PrivateRoute>
+                    }
+                  />
+                  <Route
+                    path="/projects/:projectId/gantt"
+                    element={
+                      <PrivateRoute>
+                        <GanttPage />
                       </PrivateRoute>
                     }
                   />

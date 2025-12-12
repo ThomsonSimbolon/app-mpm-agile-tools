@@ -8,7 +8,10 @@ const express = require("express");
 const router = express.Router();
 const aiController = require("../controllers/aiController");
 const auth = require("../middleware/auth");
-const roleCheck = require("../middleware/roleCheck");
+const {
+  roleCheckAdvanced,
+  requireAiAdmin,
+} = require("../middleware/roleCheckAdvanced");
 const {
   aiRateLimiter,
   checkAiAvailability,
@@ -84,39 +87,44 @@ router.post(
 /**
  * GET /api/ai/admin/usage
  * Get AI usage statistics
+ * @access Private (AI Admin or System Admin)
  */
-router.get("/admin/usage", roleCheck(["admin"]), aiController.getUsageStats);
+router.get("/admin/usage", requireAiAdmin(), aiController.getUsageStats);
 
 /**
  * GET /api/ai/admin/usage/by-user
  * Get AI usage by user
+ * @access Private (AI Admin or System Admin)
  */
 router.get(
   "/admin/usage/by-user",
-  roleCheck(["admin"]),
+  requireAiAdmin(),
   aiController.getUsageByUser
 );
 
 /**
  * GET /api/ai/admin/queue-status
  * Get AI queue status
+ * @access Private (AI Admin or System Admin)
  */
 router.get(
   "/admin/queue-status",
-  roleCheck(["admin"]),
+  requireAiAdmin(),
   aiController.getQueueStatus
 );
 
 /**
  * POST /api/ai/admin/toggle
  * Enable/disable AI features
+ * @access Private (AI Admin or System Admin)
  */
-router.post("/admin/toggle", roleCheck(["admin"]), aiController.toggleAi);
+router.post("/admin/toggle", requireAiAdmin(), aiController.toggleAi);
 
 /**
  * DELETE /api/ai/admin/cache
  * Clear AI cache
+ * @access Private (AI Admin or System Admin)
  */
-router.delete("/admin/cache", roleCheck(["admin"]), aiController.clearCache);
+router.delete("/admin/cache", requireAiAdmin(), aiController.clearCache);
 
 module.exports = router;

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { sprintService } from "../services/sprintService";
 import { projectService } from "../services/projectService";
+import { useRbac } from "../contexts/RbacContext";
 import Header from "../components/layout/Header";
 import Card from "../components/common/Card";
 import Button from "../components/common/Button";
@@ -11,6 +12,7 @@ import toast from "react-hot-toast";
 
 export default function SprintPage() {
   const { projectId } = useParams();
+  const { hasAnyPermission, isSystemAdmin } = useRbac();
   const [project, setProject] = useState(null);
   const [sprints, setSprints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -21,6 +23,35 @@ export default function SprintPage() {
     start_date: "",
     end_date: "",
   });
+
+  // RBAC Permission checks
+  const canCreateSprint = () => {
+    return (
+      hasAnyPermission([
+        "create_sprint",
+        "manage_sprint",
+        "manage_all_projects",
+      ]) || isSystemAdmin()
+    );
+  };
+  const canStartSprint = () => {
+    return (
+      hasAnyPermission([
+        "start_end_sprint",
+        "manage_sprint",
+        "manage_all_projects",
+      ]) || isSystemAdmin()
+    );
+  };
+  const canCompleteSprint = () => {
+    return (
+      hasAnyPermission([
+        "start_end_sprint",
+        "manage_sprint",
+        "manage_all_projects",
+      ]) || isSystemAdmin()
+    );
+  };
 
   useEffect(() => {
     loadData();
@@ -128,14 +159,16 @@ export default function SprintPage() {
                 <span>Back to Kanban</span>
               </Button>
             </Link>
-            <Button
-              variant="primary"
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center space-x-2"
-            >
-              <Plus size={20} />
-              <span>New Sprint</span>
-            </Button>
+            {canCreateSprint() && (
+              <Button
+                variant="primary"
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center space-x-2"
+              >
+                <Plus size={20} />
+                <span>New Sprint</span>
+              </Button>
+            )}
           </div>
         </div>
 
@@ -196,7 +229,7 @@ export default function SprintPage() {
                   </div>
 
                   <div className="flex gap-2">
-                    {sprint.status === "planning" && (
+                    {sprint.status === "planning" && canStartSprint() && (
                       <Button
                         variant="primary"
                         size="sm"
@@ -207,7 +240,7 @@ export default function SprintPage() {
                         <span>Start</span>
                       </Button>
                     )}
-                    {sprint.status === "active" && (
+                    {sprint.status === "active" && canCompleteSprint() && (
                       <Button
                         variant="success"
                         size="sm"

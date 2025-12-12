@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { departmentService, teamService } from "../services/teamService";
 import { userService } from "../services/userService";
 import { useAuth } from "../contexts/AuthContext";
+import { useRbac } from "../contexts/RbacContext";
 import Header from "../components/layout/Header";
 import Card from "../components/common/Card";
 import Button from "../components/common/Button";
@@ -21,8 +22,29 @@ import {
 import toast from "react-hot-toast";
 
 export default function TeamManagement() {
-  // Auth context for role-based access
-  const { canManageTeams, canManageDepartments, isAdmin } = useAuth();
+  // Auth & RBAC context for role-based access
+  const { user } = useAuth();
+  const { hasPermission, hasAnyPermission, isSystemAdmin } = useRbac();
+
+  // Permission helper functions using RBAC
+  const canManageTeams = () => {
+    return (
+      hasAnyPermission([
+        "manage_all_teams",
+        "manage_team",
+        "manage_team_members",
+      ]) || isSystemAdmin()
+    );
+  };
+  const canManageDepartments = () => {
+    return (
+      hasAnyPermission(["manage_departments", "manage_division_teams"]) ||
+      isSystemAdmin()
+    );
+  };
+  const isAdmin = () => {
+    return isSystemAdmin() || user?.role === "admin";
+  };
 
   const [teams, setTeams] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -1006,9 +1028,17 @@ export default function TeamManagement() {
                                 }
                                 className="text-sm px-2 py-1 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-700"
                               >
+                                {/* Team Level Roles - RBAC compliant */}
                                 <option value="member">Member</option>
-                                <option value="lead">Lead</option>
-                                <option value="admin">Admin</option>
+                                <option value="team_lead">Team Lead</option>
+                                <option value="team_admin">Team Admin</option>
+                                <option value="scrum_master">
+                                  Scrum Master
+                                </option>
+                                <option value="product_owner">
+                                  Product Owner
+                                </option>
+                                <option value="qa_lead">QA Lead</option>
                               </select>
                               <button
                                 onClick={() =>
@@ -1023,7 +1053,7 @@ export default function TeamManagement() {
                             </>
                           ) : (
                             <span className="text-sm px-2 py-1 bg-gray-100 dark:bg-gray-600 rounded capitalize">
-                              {member.role || "member"}
+                              {member.role?.replace(/_/g, " ") || "member"}
                             </span>
                           )}
                         </div>

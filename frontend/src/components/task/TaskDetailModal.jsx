@@ -17,6 +17,10 @@ import {
 import toast from "react-hot-toast";
 import { formatDistanceToNow } from "date-fns";
 import { AiButton, AiChatPanelStream, AiSuggestionPanel } from "../ai";
+import TaskAttachments from "./TaskAttachments";
+import TaskLabels from "./TaskLabels";
+import TaskTimeLogs from "./TaskTimeLogs";
+import TaskActivityFeed from "./TaskActivityFeed";
 
 export default function TaskDetailModal({ taskId, isOpen, onClose, onUpdate }) {
   const [task, setTask] = useState(null);
@@ -201,26 +205,31 @@ export default function TaskDetailModal({ taskId, isOpen, onClose, onUpdate }) {
         )}
 
         {/* Labels */}
-        {task.labels && task.labels.length > 0 && (
+        {task.project && (
           <div>
-            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-2">
-              <Tag size={16} />
-              Labels
-            </h4>
-            <div className="flex gap-2 flex-wrap">
-              {task.labels.map((label) => (
-                <span
-                  key={label.id}
-                  className="px-3 py-1 text-xs font-medium rounded-full"
-                  style={{
-                    backgroundColor: label.color + "20",
-                    color: label.color,
-                  }}
-                >
-                  {label.name}
-                </span>
-              ))}
-            </div>
+            <TaskLabels
+              taskId={taskId}
+              projectId={task.project.id}
+              currentLabels={task.labels || []}
+              onUpdate={(labels) => setTask({ ...task, labels })}
+            />
+          </div>
+        )}
+
+        {/* Attachments Section */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <TaskAttachments taskId={taskId} />
+        </div>
+
+        {/* Time Tracking Section */}
+        <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+          <TaskTimeLogs taskId={taskId} onUpdate={loadTaskDetails} />
+        </div>
+
+        {/* Activity Feed Section */}
+        {task.project && (
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
+            <TaskActivityFeed taskId={taskId} projectId={task.project.id} />
           </div>
         )}
 

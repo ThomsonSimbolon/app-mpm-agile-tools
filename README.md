@@ -1,125 +1,197 @@
-# 📋 MPM Agile Tools - Complete Documentation
+# 🚀 MPM Agile Tools
 
-> Modern Full-Stack Project Management Application with Agile/Scrum Methodology
+> Mini Project Management Application with **Enterprise RBAC System** for Multi-Layer Role-Based Access Control
 
-A complete Mini Project Management (Agile Tools) application built with **Node.js + Express** backend and **React + Vite** frontend, featuring Kanban board with drag & drop, Sprint management, and comprehensive project tracking.
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18-blue)](https://reactjs.org/)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0-orange)](https://www.mysql.com/)
+[![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
 
 ---
 
-## 📑 Table of Contents
+## 📋 Table of Contents
 
+- [About](#-about)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
-- [Prerequisites](#-prerequisites)
-- [Installation & Setup](#-installation--setup)
-- [Project Structure](#-project-structure)
+- [Enterprise RBAC System](#-enterprise-rbac-system)
+- [Quick Start](#-quick-start)
+- [Environment Variables](#-environment-variables)
 - [API Documentation](#-api-documentation)
-- [Database Schema](#-database-schema)
-- [Usage Guide](#-usage-guide)
-- [Deployment](#-deployment)
-- [Troubleshooting](#-troubleshooting)
+- [Project Structure](#-project-structure)
+- [Contributing](#-contributing)
+
+---
+
+## 📖 About
+
+**MPM Agile Tools** is a comprehensive project management application designed for teams using Agile methodologies. It features a powerful **4-layer Enterprise RBAC System** that provides granular access control across System, Division, Team, and Project levels.
+
+### 🎯 Target Users
+
+- Software Development Teams
+- Project Managers
+- Scrum Masters
+- Product Owners
+- QA Teams
+- Stakeholders
 
 ---
 
 ## ✨ Features
 
-### Core Functionality
+### Core Features
 
-- ✅ **User Authentication** - JWT-based registration & login
-- ✅ **Project Management** - Create, update, delete projects
-- ✅ **Kanban Board** - Drag & drop tasks between columns (Backlog, To Do, In Progress, In Review, Done)
-- ✅ **Sprint Management** - Create, start, and complete sprints
-- ✅ **Task Management** - Full CRUD with priorities, assignments, and subtasks
-- ✅ **Comments System** - Real-time task discussions
-- ✅ **Activity Logging** - Automatic tracking of all user actions
-- ✅ **Team Collaboration** - Add members to projects with role-based access
+- 📁 **Project Management** - Create, manage, and track multiple projects
+- 📋 **Kanban Board** - Drag & drop task management with status tracking
+- 🏃 **Sprint Management** - Plan, execute, and review sprints
+- ✅ **Task Management** - Full task lifecycle with comments & attachments
+- 👥 **Team Collaboration** - Department → Team hierarchy
+- 🔔 **Real-time Notifications** - WebSocket-based instant updates
+- 📊 **Reports & Dashboard** - Visual project analytics
 
-### Advanced Features
+### Enterprise Features (NEW!)
 
-- 🎨 **Dark Mode** - Toggle between light and dark themes
-- 📊 **Project Statistics** - Dashboard with metrics and charts
-- 🔔 **Notifications** - Real-time updates (backend ready)
-- ⏱️ **Time Tracking** - Log hours spent on tasks (backend ready)
-- 🏷️ **Labels & Tags** - Organize tasks with color-coded labels (backend ready)
-- 📎 **File Attachments** - Upload files to tasks (backend ready)
+- 🔐 **4-Layer RBAC** - System > Division > Team > Project hierarchy
+- 🛡️ **Granular Permissions** - 40+ permission codes
+- 📝 **Audit Logging** - Full permission change tracking
+- ⏰ **Time-bound Roles** - Temporary role assignments with validity periods
+- 🏢 **Institution Mapping** - Map organizational structure to RBAC
 
-### AI Features (New! 🚀)
+### AI Features
 
-- 🤖 **AI Chat with Streaming** - Real-time AI assistant powered by Google Gemini API
-- 💬 **Task-aware AI** - AI understands task context for better suggestions
-- ⚡ **Server-Sent Events (SSE)** - Smooth streaming response like ChatGPT
-- 📝 **Markdown Support** - Rich text formatting with syntax highlighting
+- 🤖 **AI Assistant** - Powered by Google Gemini
+- 💬 **Streaming Chat** - Real-time AI responses
+- 📈 **Smart Suggestions** - Task breakdown & sprint planning
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Backend
-
-- **Runtime**: Node.js v18+
-- **Framework**: Express.js
-- **Database**: MySQL 8.0+
-- **ORM**: Sequelize
-- **Authentication**: JWT (jsonwebtoken)
-- **Security**: bcrypt, helmet, cors, express-rate-limit
-- **Validation**: express-validator
-- **File Upload**: multer
-- **AI Integration**: @google/generative-ai (Gemini API)
-- **Caching**: Redis (ioredis) for AI response caching
-- **Queue**: Bull for AI request queue management
-
-### Frontend
-
-- **Library**: React 18
-- **Build Tool**: Vite
-- **Styling**: TailwindCSS + @tailwindcss/typography
-- **Routing**: React Router v6
-- **HTTP Client**: Axios
-- **Drag & Drop**: @dnd-kit
-- **Icons**: Lucide React
-- **Notifications**: React Hot Toast
-- **Date Handling**: date-fns
-- **Markdown Rendering**: react-markdown, remark-gfm, rehype-highlight
+| Layer         | Technology                   |
+| ------------- | ---------------------------- |
+| **Frontend**  | React 18, Vite, Tailwind CSS |
+| **Backend**   | Node.js, Express.js          |
+| **Database**  | MySQL with Sequelize ORM     |
+| **Real-time** | Socket.IO                    |
+| **AI**        | Google Gemini                |
+| **Auth**      | JWT                          |
+| **Caching**   | Redis (optional)             |
 
 ---
 
-## 📋 Prerequisites
+## 🔐 Enterprise RBAC System
 
-Before you begin, ensure you have the following installed:
+### 4-Layer Role Hierarchy
 
-- **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
-- **MySQL** (v8.0 or higher) - [Download](https://www.mysql.com/)
-- **npm** or **yarn** package manager
-- **Git** (optional, for cloning)
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                   PRIORITY: SYSTEM > DIVISION > TEAM > PROJECT  │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  SYSTEM LEVEL     │ super_admin, admin, security_officer,       │
+│                   │ ai_admin                                     │
+│                                                                  │
+│  DIVISION LEVEL   │ division_head, division_manager,            │
+│                   │ division_viewer, hr_reviewer                 │
+│                                                                  │
+│  TEAM LEVEL       │ team_admin, team_lead, scrum_master,        │
+│                   │ product_owner, qa_lead, member               │
+│                                                                  │
+│  PROJECT LEVEL    │ project_owner, project_manager, tech_lead,  │
+│                   │ qa_tester, developer, report_viewer,         │
+│                   │ stakeholder                                  │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Permission Resolution
+
+```
+FinalAccess = SystemRole ∪ DivisionRole ∪ TeamRole ∪ ProjectRole
+```
+
+The system uses **union** of permissions from all applicable roles, with **Super Admin** having override capability.
+
+### Quick Reference
+
+| Role              | Level    | Key Permissions                            |
+| ----------------- | -------- | ------------------------------------------ |
+| `super_admin`     | System   | Full access, override all                  |
+| `admin`           | System   | Manage users, departments, teams, projects |
+| `division_head`   | Division | Full access within division                |
+| `team_lead`       | Team     | Manage team members & tasks                |
+| `scrum_master`    | Team     | Manage sprints & ceremonies                |
+| `product_owner`   | Team     | Prioritize backlog                         |
+| `project_manager` | Project  | Manage project (no delete)                 |
+| `developer`       | Project  | Edit own tasks only                        |
+| `qa_tester`       | Project  | Edit QA fields only                        |
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js v18+
+- MySQL 8.0+
+- Redis (optional)
+- Git
 
 ### 1. Clone Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/your-username/app-mpm-agile-tools.git
 cd app-mpm-agile-tools
 ```
 
-### 2. Setup Backend
+### 2. Setup Database
 
-```bash
-# Navigate to backend directory
-cd backend
-
-# Install dependencies
-npm install
-
-# Create environment file
-cp .env.example .env
-
-# Edit .env with your configuration
-# Required: DB_PASSWORD, JWT_SECRET
+```sql
+CREATE DATABASE mpm_agile_tools;
 ```
 
-**Backend `.env` Configuration:**
+### 3. Run RBAC Migration
+
+```bash
+mysql -u root -p mpm_agile_tools < backend/src/migrations/20251210_enterprise_rbac.sql
+```
+
+### 4. Setup Backend
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+# Edit .env with your configuration
+npm run dev
+```
+
+### 5. Seed RBAC Data
+
+```bash
+cd backend
+node src/seeders/rbacSeeder.js
+```
+
+### 6. Setup Frontend
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+### 7. Access Application
+
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:5000
+
+---
+
+## ⚙️ Environment Variables
+
+### Backend (.env)
 
 ```env
 # Application
@@ -129,791 +201,228 @@ PORT=5000
 # Database
 DB_HOST=localhost
 DB_PORT=3306
-DB_USER=root
-DB_PASSWORD=your_mysql_password
 DB_NAME=mpm_agile_tools
+DB_USER=root
+DB_PASSWORD=
 
 # JWT
-JWT_SECRET=your-super-secret-key-change-this-in-production
-JWT_EXPIRES_IN=24h
+JWT_SECRET=your_super_secret_key
+JWT_EXPIRE=7d
 
-# Frontend URL (for CORS)
+# Frontend URL (CORS)
 FRONTEND_URL=http://localhost:5173
+
+# Gemini AI
+GEMINI_API_KEY=your_gemini_api_key
+GEMINI_MODEL=gemini-2.0-flash
+AI_ENABLED=true
+
+# Redis (optional)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# RBAC
+RBAC_DEBUG=false
+RBAC_CACHE_TTL=3600
 ```
 
-### 3. Setup Database
+---
 
-```sql
--- Login to MySQL
-mysql -u root -p
+## 📚 API Documentation
 
--- Create database
-CREATE DATABASE mpm_agile_tools;
+### Authentication
 
--- Use the database
-USE mpm_agile_tools;
+| Method | Endpoint             | Description                 |
+| ------ | -------------------- | --------------------------- |
+| POST   | `/api/auth/register` | Register user               |
+| POST   | `/api/auth/login`    | Login user                  |
+| GET    | `/api/auth/me`       | Get current user with roles |
 
--- Add password reset columns to users table (if needed)
-ALTER TABLE users
-ADD COLUMN reset_password_token VARCHAR(255) NULL,
-ADD COLUMN reset_password_expires DATETIME NULL;
-```
+### RBAC Management
 
-**Note:** The application will automatically create tables on first run using Sequelize models.
+| Method | Endpoint                          | Description                    |
+| ------ | --------------------------------- | ------------------------------ |
+| GET    | `/api/rbac/permissions`           | Get all permissions            |
+| GET    | `/api/rbac/role-definitions`      | Get role definitions           |
+| GET    | `/api/rbac/my-permissions`        | Get current user's permissions |
+| PUT    | `/api/rbac/users/:id/system-role` | Update user's system role      |
+| POST   | `/api/rbac/users/:id/assignments` | Create role assignment         |
+| GET    | `/api/rbac/audit-logs`            | Get audit logs                 |
 
-### 4. Setup Frontend
+### Projects
 
-```bash
-# Navigate to frontend directory (from root)
-cd frontend
+| Method | Endpoint            | Description         |
+| ------ | ------------------- | ------------------- |
+| GET    | `/api/projects`     | Get user's projects |
+| POST   | `/api/projects`     | Create project      |
+| PUT    | `/api/projects/:id` | Update project      |
+| DELETE | `/api/projects/:id` | Delete project      |
 
-# Install dependencies
-npm install
+### Tasks
 
-# Create environment file
-cp .env.example .env
-```
+| Method | Endpoint                        | Description        |
+| ------ | ------------------------------- | ------------------ |
+| POST   | `/api/tasks/projects/:id/tasks` | Create task        |
+| GET    | `/api/tasks/:id`                | Get task detail    |
+| PUT    | `/api/tasks/:id`                | Update task        |
+| PUT    | `/api/tasks/:id/status`         | Update task status |
+| DELETE | `/api/tasks/:id`                | Delete task        |
 
-**Frontend `.env` Configuration:**
+### Sprints
 
-```env
-VITE_API_URL=http://localhost:5000/api
-```
+| Method | Endpoint                            | Description     |
+| ------ | ----------------------------------- | --------------- |
+| POST   | `/api/sprints/projects/:id/sprints` | Create sprint   |
+| POST   | `/api/sprints/:id/start`            | Start sprint    |
+| POST   | `/api/sprints/:id/complete`         | Complete sprint |
 
-### 5. Start Development Servers
-
-**Terminal 1 - Backend:**
-
-```bash
-cd backend
-npm run dev
-```
-
-Backend runs on: `http://localhost:5000`
-
-**Terminal 2 - Frontend:**
-
-```bash
-cd frontend
-npm run dev
-```
-
-Frontend runs on: `http://localhost:5173`
-
-### 6. Create First Admin User
-
-1. Open browser: `http://localhost:5173`
-2. Click "Sign Up"
-3. Register with your details
-4. To make admin, run in MySQL:
-
-```sql
-USE mpm_agile_tools;
-UPDATE users SET role = 'admin' WHERE email = 'your@email.com';
-```
+For complete API documentation, see [DOCUMENTATION.md](DOCUMENTATION.md).
 
 ---
 
 ## 📁 Project Structure
 
-### Backend Structure
-
 ```
-backend/
-├── src/
-│   ├── config/           # Configuration files
-│   │   ├── auth.js       # JWT configuration
-│   │   ├── database.js   # Sequelize database config
-│   │   └── multer.js     # File upload config
-│   ├── controllers/      # Business logic (9 controllers)
-│   │   ├── authController.js
-│   │   ├── projectController.js
-│   │   ├── taskController.js
-│   │   ├── sprintController.js
-│   │   ├── commentController.js
-│   │   ├── attachmentController.js
-│   │   ├── timeLogController.js
-│   │   ├── labelController.js
-│   │   ├── notificationController.js
-│   │   ├── activityController.js
-│   │   └── userController.js
-│   ├── middleware/       # Express middleware
-│   │   ├── auth.js       # JWT verification
-│   │   ├── roleCheck.js  # Role-based access control
-│   │   ├── validation.js # Request validation
-│   │   ├── errorHandler.js
-│   │   └── activityLogger.js
-│   ├── models/          # Sequelize models (12 models)
-│   │   ├── index.js
-│   │   ├── User.js
-│   │   ├── Project.js
-│   │   ├── ProjectMember.js
-│   │   ├── Sprint.js
-│   │   ├── Task.js
-│   │   ├── Comment.js
-│   │   ├── Attachment.js
-│   │   ├── ActivityLog.js
-│   │   ├── Label.js
-│   │   ├── TaskLabel.js
-│   │   ├── TimeLog.js
-│   │   └── Notification.js
-│   ├── routes/          # API routes (10 route files)
-│   │   ├── index.js
-│   │   ├── authRoutes.js
-│   │   ├── projectRoutes.js
-│   │   ├── taskRoutes.js
-│   │   ├── sprintRoutes.js
-│   │   ├── commentRoutes.js
-│   │   ├── attachmentRoutes.js
-│   │   ├── timeLogRoutes.js
-│   │   ├── labelRoutes.js
-│   │   ├── notificationRoutes.js
-│   │   ├── activityRoutes.js
-│   │   └── userRoutes.js
-│   ├── utils/           # Utility functions
-│   │   ├── helpers.js
-│   │   └── constants.js
-│   └── app.js          # Express app setup
-├── uploads/            # File uploads directory
-├── server.js          # Entry point
-├── package.json
-└── .env
-```
-
-### Frontend Structure
-
-```
-frontend/
-├── src/
-│   ├── components/
-│   │   ├── auth/
-│   │   │   └── PrivateRoute.jsx
-│   │   ├── common/
-│   │   │   ├── Button.jsx
-│   │   │   ├── Card.jsx
-│   │   │   ├── Input.jsx
-│   │   │   └── Modal.jsx
-│   │   ├── kanban/
-│   │   │   ├── KanbanBoard.jsx
-│   │   │   ├── KanbanColumn.jsx
-│   │   │   └── KanbanCard.jsx
-│   │   ├── layout/
-│   │   │   └── Header.jsx
-│   │   └── task/
-│   │       └── TaskDetailModal.jsx
-│   ├── contexts/
-│   │   ├── AuthContext.jsx
-│   │   └── ThemeContext.jsx
-│   ├── pages/
-│   │   ├── Login.jsx
-│   │   ├── Register.jsx
-│   │   ├── Dashboard.jsx
-│   │   ├── Projects.jsx
-│   │   ├── KanbanPage.jsx
-│   │   └── SprintPage.jsx
-│   ├── services/
-│   │   ├── api.js
-│   │   ├── authService.js
-│   │   ├── projectService.js
-│   │   ├── taskService.js
-│   │   ├── sprintService.js
-│   │   └── commentService.js
-│   ├── styles/
-│   │   └── index.css
-│   ├── App.jsx
-│   └── main.jsx
-├── public/
-├── index.html
-├── package.json
-├── vite.config.js
-├── tailwind.config.js
-└── .env
+app-mpm-agile-tools/
+├── DOCUMENTATION.md      # Full documentation
+├── README.md             # This file
+├── backend/
+│   ├── server.js         # Entry point
+│   ├── package.json
+│   └── src/
+│       ├── app.js
+│       ├── config/
+│       │   ├── rbacConfig.js     # 🔐 RBAC configuration
+│       │   └── ...
+│       ├── controllers/
+│       │   ├── rbacController.js # 🔐 RBAC management
+│       │   └── ...
+│       ├── middleware/
+│       │   ├── roleCheckAdvanced.js  # 🔐 RBAC middleware
+│       │   └── ...
+│       ├── migrations/
+│       │   └── 20251210_enterprise_rbac.sql
+│       ├── models/
+│       │   ├── DepartmentMember.js   # 🔐
+│       │   ├── RbacPermission.js     # 🔐
+│       │   ├── RolePermission.js     # 🔐
+│       │   ├── UserRoleAssignment.js # 🔐
+│       │   └── ...
+│       ├── routes/
+│       │   ├── rbacRoutes.js     # 🔐 RBAC API routes
+│       │   └── ...
+│       └── seeders/
+│           └── rbacSeeder.js     # 🔐 Seed RBAC data
+└── frontend/
+    ├── package.json
+    └── src/
+        ├── App.jsx
+        ├── pages/
+        │   └── UserRoleManagement.jsx  # 🔐 RBAC UI
+        ├── services/
+        │   └── rbacService.js    # 🔐 RBAC API service
+        └── ...
 ```
 
 ---
 
-## � API Documentation
+## 🔧 Usage Examples
 
-### Base URL
-
-```
-http://localhost:5000/api
-```
-
-### Authentication Endpoints
-
-| Method | Endpoint                | Description               | Auth Required |
-| ------ | ----------------------- | ------------------------- | ------------- |
-| POST   | `/auth/register`        | Register new user         | No            |
-| POST   | `/auth/login`           | Login user                | No            |
-| GET    | `/auth/me`              | Get current user          | Yes           |
-| POST   | `/auth/logout`          | Logout user               | Yes           |
-| PUT    | `/auth/change-password` | Change password           | Yes           |
-| POST   | `/auth/forgot-password` | Request password reset    | No            |
-| POST   | `/auth/reset-password`  | Reset password with token | No            |
-
-### Project Endpoints
-
-| Method | Endpoint                        | Description           | Auth Required |
-| ------ | ------------------------------- | --------------------- | ------------- |
-| POST   | `/projects`                     | Create project        | Yes           |
-| GET    | `/projects`                     | Get all user projects | Yes           |
-| GET    | `/projects/:id`                 | Get project by ID     | Yes           |
-| PUT    | `/projects/:id`                 | Update project        | Yes           |
-| DELETE | `/projects/:id`                 | Delete project        | Yes           |
-| GET    | `/projects/:id/statistics`      | Get project stats     | Yes           |
-| POST   | `/projects/:id/members`         | Add member            | Yes           |
-| DELETE | `/projects/:id/members/:userId` | Remove member         | Yes           |
-| PUT    | `/projects/:id/members/:userId` | Update member role    | Yes           |
-
-### Task Endpoints
-
-| Method  | Endpoint                           | Description                     | Auth Required |
-| ------- | ---------------------------------- | ------------------------------- | ------------- |
-| POST    | `/tasks/projects/:projectId/tasks` | Create task                     | Yes           |
-| GET     | `/tasks/projects/:projectId/tasks` | Get project tasks               | Yes           |
-| GET     | `/tasks/:id`                       | Get task by ID                  | Yes           |
-| PUT     | `/tasks/:id`                       | Update task                     | Yes           |
-| **PUT** | **`/tasks/:id/status`**            | **Update task status (Kanban)** | Yes           |
-| PUT     | `/tasks/:id/assign`                | Assign task                     | Yes           |
-| DELETE  | `/tasks/:id`                       | Delete task                     | Yes           |
-| POST    | `/tasks/:id/subtasks`              | Create subtask                  | Yes           |
-
-### Sprint Endpoints
-
-| Method | Endpoint                               | Description         | Auth Required |
-| ------ | -------------------------------------- | ------------------- | ------------- |
-| POST   | `/sprints/projects/:projectId/sprints` | Create sprint       | Yes           |
-| GET    | `/sprints/projects/:projectId/sprints` | Get project sprints | Yes           |
-| GET    | `/sprints/:id`                         | Get sprint by ID    | Yes           |
-| PUT    | `/sprints/:id`                         | Update sprint       | Yes           |
-| DELETE | `/sprints/:id`                         | Delete sprint       | Yes           |
-| POST   | `/sprints/:id/start`                   | Start sprint        | Yes           |
-| POST   | `/sprints/:id/complete`                | Complete sprint     | Yes           |
-| GET    | `/sprints/:id/burndown`                | Get burndown data   | Yes           |
-
-### Comment Endpoints
-
-| Method | Endpoint                           | Description       | Auth Required |
-| ------ | ---------------------------------- | ----------------- | ------------- |
-| POST   | `/comments/tasks/:taskId/comments` | Add comment       | Yes           |
-| GET    | `/comments/tasks/:taskId/comments` | Get task comments | Yes           |
-| PUT    | `/comments/:id`                    | Update comment    | Yes           |
-| DELETE | `/comments/:id`                    | Delete comment    | Yes           |
-
-### AI Endpoints (New! 🤖)
-
-| Method | Endpoint                  | Description                           | Auth Required |
-| ------ | ------------------------- | ------------------------------------- | ------------- |
-| POST   | `/ai/chat/stream`         | AI Chat with streaming response (SSE) | Yes           |
-| POST   | `/ai/chat`                | AI Chat (non-streaming)               | Yes           |
-| POST   | `/ai/task-suggestions`    | Get AI suggestions for task           | Yes           |
-| POST   | `/ai/analyze-sprint`      | AI sprint analysis                    | Yes           |
-| GET    | `/ai/insights/:projectId` | Get AI project insights               | Yes           |
-| GET    | `/ai/settings`            | Get AI settings                       | Yes           |
-| PUT    | `/ai/settings`            | Update AI settings                    | Yes (Admin)   |
-
-### Other Endpoints
-
-- **Attachments**: `/attachments/*`
-- **Time Logs**: `/time-logs/*`
-- **Labels**: `/labels/*`
-- **Notifications**: `/notifications/*`
-- **Activities**: `/activities/*`
-- **Users**: `/users/*`
-
-**Total**: 70+ REST API endpoints
-
----
-
-## 🗄️ Database Schema
-
-### Core Tables (15 tables)
-
-1. **users** - User accounts with authentication
-2. **projects** - Projects information
-3. **project_members** - Many-to-many project memberships
-4. **sprints** - Sprint cycles
-5. **tasks** - Tasks/Issues with priorities
-6. **comments** - Task comments
-7. **attachments** - File uploads
-8. **activity_logs** - Audit trail
-9. **labels** - Color-coded tags
-10. **task_labels** - Task label mappings
-11. **time_logs** - Time tracking entries
-12. **notifications** - User notifications
-
-### AI Tables (New! 🤖)
-
-13. **ai_settings** - AI configuration per project
-14. **ai_cache** - Cached AI responses for performance
-15. **ai_usage_logs** - Track AI API usage and costs
-
-### Key Relationships
-
-```
-User ──< ProjectMember >── Project
-Project ──< Sprint
-Project ──< Task ──< Comment
-Task ──< Attachment
-Task >──< Label (through TaskLabel)
-Task ──< TimeLog
-User ──< Notification
-Project ──< AiSetting
-User ──< AiUsageLog
-```
-
----
-
-## 📖 Usage Guide
-
-### 1. Authentication Flow
+### RBAC Middleware Usage
 
 ```javascript
-// Register
-POST /api/auth/register
-{
-  "username": "johndoe",
-  "email": "john@example.com",
-  "password": "password123",
-  "full_name": "John Doe"
-}
+const {
+  roleCheckAdvanced,
+  SYSTEM_ROLES,
+  PERMISSIONS,
+} = require("../middleware/roleCheckAdvanced");
 
-// Login
-POST /api/auth/login
-{
-  "email": "john@example.com",
-  "password": "password123"
-}
-
-// Response includes JWT token
-{
-  "success": true,
-  "data": {
-    "user": {...},
-    "token": "eyJhbGc..."
-  }
-}
-```
-
-### 2. Creating a Project
-
-```javascript
-POST /api/projects
-Headers: { Authorization: "Bearer <token>" }
-{
-  "name": "My Awesome Project",
-  "description": "Project description",
-  "start_date": "2025-01-01",
-  "end_date": "2025-12-31"
-}
-```
-
-### 3. Creating Tasks
-
-```javascript
-POST /api/tasks/projects/1/tasks
-Headers: { Authorization: "Bearer <token>" }
-{
-  "title": "Implement login page",
-  "description": "Create responsive login UI",
-  "priority": "high",
-  "story_points": 5
-}
-```
-
-### 4. Moving Tasks (Kanban)
-
-```javascript
-PUT /api/tasks/1/status
-Headers: { Authorization: "Bearer <token>" }
-{
-  "status": "in_progress"
-}
-```
-
-### 5. Adding Comments
-
-```javascript
-POST /api/comments/tasks/1/comments
-Headers: { Authorization: "Bearer <token>" }
-{
-  "content": "Great work on this task!"
-}
-```
-
-### 6. AI Chat with Streaming (New! 🤖)
-
-**Backend Setup:**
-Add the following to your backend `.env`:
-
-```env
-# Gemini AI Configuration
-GEMINI_API_KEY=your-gemini-api-key
-GEMINI_MODEL=gemini-1.5-flash
-AI_MAX_TOKENS=8192
-AI_TEMPERATURE=0.7
-```
-
-**API Request (Server-Sent Events):**
-
-```javascript
-// Frontend: Using Fetch API with streaming
-const response = await fetch("/api/ai/chat/stream", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token}`,
-  },
-  body: JSON.stringify({
-    message: "How do I implement user authentication?",
-    taskContext: {
-      /* optional task details */
-    },
+// Check specific roles
+router.delete(
+  "/users/:id",
+  auth,
+  roleCheckAdvanced({
+    roles: [SYSTEM_ROLES.SUPER_ADMIN],
   }),
-});
+  deleteUser
+);
 
-// Read streaming response
-const reader = response.body.getReader();
-const decoder = new TextDecoder();
+// Check specific permissions
+router.post(
+  "/tasks",
+  auth,
+  roleCheckAdvanced({
+    permissions: [PERMISSIONS.CREATE_TASK],
+  }),
+  createTask
+);
 
-while (true) {
-  const { done, value } = await reader.read();
-  if (done) break;
-
-  const chunk = decoder.decode(value);
-  // Process SSE data: "data: {\"text\": \"chunk\"}\n\n"
-  console.log(chunk);
-}
+// Ownership check (developer can only edit own tasks)
+router.put(
+  "/tasks/:id",
+  auth,
+  roleCheckAdvanced({
+    permissions: [PERMISSIONS.EDIT_TASK],
+    checkOwnership: true,
+    resourceType: "task",
+  }),
+  updateTask
+);
 ```
 
-**Response Format (SSE):**
-
-```
-data: {"text": "Hello"}
-
-data: {"text": "! How"}
-
-data: {"text": " can I"}
-
-data: {"text": " help you?"}
-
-data: [DONE]
-```
-
----
-
-## 🚀 Deployment
-
-### Backend Deployment
-
-**Option 1: Traditional VPS (Ubuntu/Debian)**
-
-```bash
-# Install dependencies
-sudo apt update
-sudo apt install nodejs npm mysql-server nginx
-
-# Clone and setup
-git clone <repo>
-cd backend
-npm install --production
-
-# Setup PM2 for process management
-npm install -g pm2
-pm2 start server.js --name mpm-backend
-pm2 startup
-pm2 save
-
-# Configure Nginx reverse proxy
-sudo nano /etc/nginx/sites-available/mpm-api
-
-# Add configuration:
-server {
-    listen 80;
-    server_name api.yourdomain.com;
-
-    location / {
-        proxy_pass http://localhost:5000;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host $host;
-        proxy_cache_bypass $http_upgrade;
-    }
-}
-
-# Enable and restart
-sudo ln -s /etc/nginx/sites-available/mpm-api /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl restart nginx
-```
-
-**Option 2: Heroku**
-
-```bash
-# Create Heroku app
-heroku create mpm-agile-backend
-
-# Add MySQL addon
-heroku addons:create jawsdb
-
-# Set environment variables
-heroku config:set JWT_SECRET=your-secret
-heroku config:set NODE_ENV=production
-
-# Deploy
-git push heroku main
-```
-
-### Frontend Deployment
-
-**Option 1: Vercel (Recommended)**
-
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-cd frontend
-vercel --prod
-```
-
-**Option 2: Netlify**
-
-```bash
-# Build
-npm run build
-
-# Deploy dist folder via Netlify UI or CLI
-netlify deploy --prod --dir=dist
-```
-
-**Option 3: Traditional VPS**
-
-```bash
-# Build
-npm run build
-
-# Copy dist folder to Nginx
-sudo cp -r dist/* /var/www/mpm-frontend/
-
-# Configure Nginx
-server {
-    listen 80;
-    server_name yourdomain.com;
-    root /var/www/mpm-frontend;
-    index index.html;
-
-    location / {
-        try_files $uri $uri/ /index.html;
-    }
-}
-```
-
----
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-**1. Database Connection Error**
-
-```
-Error: Access denied for user 'root'@'localhost'
-```
-
-**Solution**: Check MySQL credentials in `.env` file and ensure MySQL is running.
-
-**2. JWT Secret Not Set**
-
-```
-Error: JWT_SECRET is not defined
-```
-
-**Solution**: Set `JWT_SECRET` in backend `.env` file.
-
-**3. CORS Error in Frontend**
-
-```
-Access to XMLHttpRequest blocked by CORS policy
-```
-
-**Solution**: Ensure `FRONTEND_URL` in backend `.env` matches your frontend URL.
-
-**4. Port Already in Use**
-
-```
-Error: listen EADDRINUSE: address already in use :::5000
-```
-
-**Solution**: Kill the process using the port or change PORT in `.env`.
-
-**5. Tasks Not Appearing in Kanban**
-
-```
-Empty columns in Kanban board
-```
-
-**Solution**: Create tasks via "New Task" button or check browser console for API errors.
-
-### AI-Related Issues (New! 🤖)
-
-**6. AI Chat Not Responding**
-
-```
-Error: GEMINI_API_KEY is not defined
-```
-
-**Solution**: Add `GEMINI_API_KEY` to backend `.env` file. Get API key from [Google AI Studio](https://aistudio.google.com/).
-
-**7. AI Streaming Not Working**
-
-```
-ReadableStream not supported or SSE connection failed
-```
-
-**Solution**:
-
-- Ensure browser supports Fetch API with streaming
-- Check if backend CORS allows streaming responses
-- Verify `Content-Type: text/event-stream` header is set
-
-**8. AI Rate Limit Exceeded**
-
-```
-Error: AI rate limit exceeded. Please try again later.
-```
-
-**Solution**: Wait for rate limit to reset (default: 20 requests/minute) or adjust `AI_RATE_LIMIT` in backend `.env`.
-
-**9. Tailwind Typography Plugin Error**
-
-```
-Error: require() of ES Module @tailwindcss/typography
-```
-
-**Solution**: Use ESM import in `tailwind.config.js`:
+### Convenience Middlewares
 
 ```javascript
-import typography from "@tailwindcss/typography";
-export default {
-  // ...
-  plugins: [typography],
-};
-```
+const {
+  requireSystemAdmin,
+  requireSuperAdmin,
+  requireSprintManager,
+  requireTaskEditor,
+  requireAiAdmin,
+} = require("../middleware/roleCheckAdvanced");
 
-### Development Tips
-
-```bash
-# Reset database (CAUTION: Deletes all data)
-mysql -u root -p
-DROP DATABASE mpm_agile_tools;
-CREATE DATABASE mpm_agile_tools;
-
-# Check backend logs
-cd backend
-npm run dev  # Watch for errors in terminal
-
-# Check frontend errors
-# Open browser DevTools (F12) → Console tab
-
-# Test API with curl
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@test.com","password":"test123"}'
+router.delete("/users/:id", auth, requireSuperAdmin(), deleteUser);
+router.post("/sprints/:id/start", auth, requireSprintManager(), startSprint);
+router.put("/ai/settings", auth, requireAiAdmin(), updateAiSettings);
 ```
 
 ---
 
-## 📊 Performance Metrics
+## 📊 Summary
 
-- **Backend**: Handles 100+ requests/15min (rate limited)
-- **Database**: Optimized with indexes on foreign keys
-- **Frontend**: Lighthouse score: 90+ (Performance)
-- **Bundle Size**: < 500KB gzipped
-- **AI Streaming**: Real-time response with SSE (latency < 100ms per chunk)
-- **AI Rate Limit**: 20 requests/minute per user (configurable)
-
----
-
-## 🔐 Security Features
-
-- ✅ JWT authentication with bcrypt password hashing
-- ✅ CORS protection with whitelist
-- ✅ Helmet.js security headers
-- ✅ Rate limiting (100 req/15min)
-- ✅ Input validation and sanitization
-- ✅ SQL injection protection (Sequelize ORM)
-- ✅ XSS protection
-- ✅ Role-based access control
-- ✅ AI rate limiting (20 req/min per user)
-- ✅ AI API key protection (server-side only)
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License.
+| Category            | Count |
+| ------------------- | ----- |
+| API Endpoints       | 90+   |
+| Database Tables     | 20+   |
+| RBAC Roles          | 21    |
+| RBAC Permissions    | 40+   |
+| Frontend Components | 40+   |
 
 ---
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+1. Fork the repository
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
 
 ---
 
-## � Support
+## 📄 License
 
-For issues and questions:
-
-- Create an issue on GitHub
-- Email: support@yourproject.com
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## 🎯 Roadmap
+## 📞 Support
 
-- [x] **AI Chat with Streaming Response** - Powered by Google Gemini API ✅ (Dec 2024)
-- [ ] Real-time notifications with WebSockets
-- [ ] Email integration for notifications
-- [ ] Advanced reporting and analytics
-- [ ] Mobile app (React Native)
-- [ ] Integration with third-party tools (Slack, GitHub)
+For support, please create an issue or contact the development team.
 
 ---
 
-**Built with ❤️ using Node.js, React, and TailwindCSS**
+**Built with ❤️ using Node.js, React, TailwindCSS, and Enterprise RBAC**
 
----
-
-## Quick Reference Card
-
-```bash
-# Start Backend
-cd backend && npm run dev
-
-# Start Frontend
-cd frontend && npm run dev
-
-# Default URLs
-Backend:  http://localhost:5000
-Frontend: http://localhost:5173
-API Docs: http://localhost:5000/api
-
-# Default Test Account (after creating & updating role)
-Email: admin@test.com
-Password: admin123
-Role: admin (update in database)
-```
-
-**Total Project Stats:**
-
-- 📦 85+ production files
-- 🔌 70+ API endpoints
-- 🗄️ 15 database tables (including AI tables)
-- 📱 35+ frontend components
-- 🎨 100% responsive design
-- 🌙 Full dark mode support
-- 🤖 AI-powered features with Gemini API
+> **Version:** 2.0.0  
+> **Last Updated:** December 11, 2025

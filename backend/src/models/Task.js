@@ -70,6 +70,24 @@ module.exports = (sequelize) => {
         foreignKey: "task_id",
         as: "activities",
       });
+
+      // Task dependencies for Gantt chart (as predecessor)
+      Task.hasMany(models.TaskDependency, {
+        foreignKey: "predecessor_id",
+        as: "successorDependencies",
+      });
+
+      // Task dependencies for Gantt chart (as successor)
+      Task.hasMany(models.TaskDependency, {
+        foreignKey: "successor_id",
+        as: "predecessorDependencies",
+      });
+
+      // Task can have calendar events linked to it
+      Task.hasMany(models.CalendarEvent, {
+        foreignKey: "task_id",
+        as: "calendarEvents",
+      });
     }
   }
 
@@ -158,6 +176,29 @@ module.exports = (sequelize) => {
       due_date: {
         type: DataTypes.DATE,
         allowNull: true,
+      },
+      start_date: {
+        type: DataTypes.DATE,
+        allowNull: true,
+        comment: "Task start date for Gantt chart",
+      },
+      estimated_hours: {
+        type: DataTypes.FLOAT,
+        allowNull: true,
+        validate: {
+          min: 0,
+        },
+        comment: "Estimated hours to complete the task",
+      },
+      progress_percentage: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0,
+        validate: {
+          min: 0,
+          max: 100,
+        },
+        comment: "Task progress percentage (0-100) for Gantt chart",
       },
       completed_at: {
         type: DataTypes.DATE,

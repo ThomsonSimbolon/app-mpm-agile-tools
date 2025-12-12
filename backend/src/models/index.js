@@ -43,6 +43,17 @@ const RolePermission = require("./RolePermission")(sequelize);
 const UserRoleAssignment = require("./UserRoleAssignment")(sequelize);
 const PermissionAuditLog = require("./PermissionAuditLog")(sequelize);
 
+// Approval & Delegation Models
+const TaskApproval = require("./TaskApproval")(sequelize);
+const UserLeave = require("./UserLeave")(sequelize);
+const TaskDelegation = require("./TaskDelegation")(sequelize);
+
+// Calendar & Scheduling Models
+const CalendarEvent = require("./CalendarEvent")(sequelize);
+const ProjectMilestone = require("./ProjectMilestone")(sequelize);
+const CalendarIntegration = require("./CalendarIntegration")(sequelize);
+const TaskDependency = require("./TaskDependency")(sequelize);
+
 // Create models object
 const models = {
   User,
@@ -71,6 +82,15 @@ const models = {
   RolePermission,
   UserRoleAssignment,
   PermissionAuditLog,
+  // Approval & Delegation Models
+  TaskApproval,
+  UserLeave,
+  TaskDelegation,
+  // Calendar & Scheduling Models
+  CalendarEvent,
+  ProjectMilestone,
+  CalendarIntegration,
+  TaskDependency,
   sequelize,
   Sequelize,
 };

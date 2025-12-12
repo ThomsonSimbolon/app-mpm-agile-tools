@@ -1,8 +1,8 @@
 # 📚 MPM Agile Tools - Dokumentasi Lengkap
 
-> **Versi:** 1.0.0  
-> **Tanggal Update:** 10 Desember 2025  
-> **Status:** Production Ready
+> **Versi:** 2.0.0  
+> **Tanggal Update:** 11 Desember 2025  
+> **Status:** Production Ready with Enterprise RBAC
 
 ---
 
@@ -12,7 +12,7 @@
 2. [Arsitektur Sistem](#2-arsitektur-sistem)
 3. [Struktur Folder](#3-struktur-folder)
 4. [Database Schema](#4-database-schema)
-5. [Sistem Role & Hak Akses](#5-sistem-role--hak-akses)
+5. [Enterprise RBAC System](#5-enterprise-rbac-system)
 6. [Fitur-Fitur Aplikasi](#6-fitur-fitur-aplikasi)
 7. [API Endpoints](#7-api-endpoints)
 8. [Konfigurasi](#8-konfigurasi)
@@ -25,7 +25,7 @@
 
 ### 1.1 Deskripsi
 
-**MPM Agile Tools** adalah aplikasi manajemen proyek berbasis metodologi Agile yang dirancang untuk membantu tim dalam mengelola proyek, sprint, task, dan kolaborasi tim secara efektif.
+**MPM Agile Tools** adalah aplikasi manajemen proyek berbasis metodologi Agile yang dirancang untuk membantu tim dalam mengelola proyek, sprint, task, dan kolaborasi tim secara efektif. Dilengkapi dengan **Enterprise RBAC System (Multi-Layer Role-Based Access Control)** untuk kontrol akses yang granular.
 
 ### 1.2 Tech Stack
 
@@ -37,25 +37,31 @@
 | **Real-time**      | Socket.IO                    |
 | **AI Integration** | Google Gemini AI             |
 | **Authentication** | JWT (JSON Web Token)         |
+| **Authorization**  | Enterprise RBAC (4-Layer)    |
 | **File Upload**    | Multer                       |
+| **Caching**        | Redis                        |
 
 ### 1.3 Fitur Utama
 
 - ✅ Manajemen Proyek
-- ✅ Kanban Board
+- ✅ Kanban Board dengan Drag & Drop
 - ✅ Sprint Management
 - ✅ Task Management
-- ✅ Tim & Organisasi
+- ✅ **Enterprise RBAC System (NEW!)**
+- ✅ Tim & Organisasi (Department → Team)
 - ✅ Real-time Notifications (WebSocket)
 - ✅ Dashboard & Reporting
 - ✅ AI Assistant (Gemini)
 - ✅ Activity Logging
 - ✅ File Attachments
 - ✅ Comments & Collaboration
+- ✅ Permission Audit Logs
 
 ---
 
 ## 2. Arsitektur Sistem
+
+### 2.1 System Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────┐
@@ -73,32 +79,43 @@
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
 │  │   Routes    │  │ Controllers │  │  Services   │  │ Middleware  │    │
 │  └─────────────┘  └─────────────┘  └─────────────┘  └─────────────┘    │
+│                                                            │             │
+│                                               ┌────────────┴──────────┐ │
+│                                               │   RBAC Middleware     │ │
+│                                               │  roleCheckAdvanced.js │ │
+│                                               └───────────────────────┘ │
 └─────────────────────────────────────────────────────────────────────────┘
                                     │
                     ┌───────────────┼───────────────┐
                     ▼               ▼               ▼
             ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
             │    MySQL    │ │    Redis    │ │  Gemini AI  │
-            │  Database   │ │   (Queue)   │ │    API      │
+            │  Database   │ │   (Cache)   │ │    API      │
             └─────────────┘ └─────────────┘ └─────────────┘
 ```
 
-### 2.1 Flow Request-Response
+### 2.2 RBAC Request Flow
 
 ```
-User Action → React Component → Service Layer → API Call
-                                                    ↓
-                                              Express Router
-                                                    ↓
-                                              Middleware (Auth, Validation)
-                                                    ↓
-                                              Controller
-                                                    ↓
-                                              Model (Sequelize)
-                                                    ↓
-                                              MySQL Database
-                                                    ↓
-                                              Response → Frontend
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                           REQUEST FLOW WITH RBAC                              │
+├──────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│   Request → Auth Middleware → roleCheckAdvanced → Controller → Response      │
+│                                      │                                        │
+│                         ┌────────────┴────────────┐                          │
+│                         │                         │                           │
+│                         ▼                         ▼                           │
+│              ┌──────────────────┐    ┌──────────────────┐                    │
+│              │ Role Resolution  │    │Permission Check  │                    │
+│              │                  │    │                  │                    │
+│              │ • System Role    │    │ • Matrix Lookup  │                    │
+│              │ • Division Role  │    │ • Conditional    │                    │
+│              │ • Team Role      │    │ • Ownership      │                    │
+│              │ • Project Role   │    │ • Override       │                    │
+│              └──────────────────┘    └──────────────────┘                    │
+│                                                                               │
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -112,6 +129,8 @@ backend/
 ├── server.js                 # Entry point
 ├── package.json
 ├── .env                      # Environment variables
+├── docs/
+│   └── ENTERPRISE_RBAC.md    # RBAC documentation
 └── src/
     ├── app.js                # Express app configuration
     ├── config/
@@ -119,7 +138,9 @@ backend/
     │   ├── database.js       # Sequelize configuration
     │   ├── gemini.js         # Gemini AI configuration
     │   ├── multer.js         # File upload configuration
-    │   └── redis.js          # Redis configuration
+    │   ├── rbacConfig.js     # 🔐 RBAC configuration & matrices
+    │   ├── redis.js          # Redis configuration
+    │   └── socket.js         # Socket.IO configuration
     ├── controllers/
     │   ├── activityController.js
     │   ├── aiController.js
@@ -127,9 +148,12 @@ backend/
     │   ├── authController.js
     │   ├── commentController.js
     │   ├── departmentController.js
+    │   ├── exportController.js
     │   ├── labelController.js
     │   ├── notificationController.js
     │   ├── projectController.js
+    │   ├── rbacController.js      # 🔐 RBAC management
+    │   ├── reportController.js
     │   ├── sprintController.js
     │   ├── taskController.js
     │   ├── teamController.js
@@ -138,12 +162,15 @@ backend/
     ├── middleware/
     │   ├── activityLogger.js
     │   ├── aiRateLimiter.js
-    │   ├── auth.js
+    │   ├── auth.js               # JWT verification
     │   ├── errorHandler.js
-    │   ├── roleCheck.js
+    │   ├── roleCheck.js          # Legacy role check
+    │   ├── roleCheckAdvanced.js  # 🔐 Enterprise RBAC middleware
     │   └── validation.js
+    ├── migrations/
+    │   └── 20251210_enterprise_rbac.sql  # 🔐 RBAC schema
     ├── models/
-    │   ├── index.js          # Model associations
+    │   ├── index.js              # Model associations
     │   ├── ActivityLog.js
     │   ├── AiCache.js
     │   ├── AiSetting.js
@@ -151,36 +178,48 @@ backend/
     │   ├── Attachment.js
     │   ├── Comment.js
     │   ├── Department.js
+    │   ├── DepartmentMember.js   # 🔐 Division memberships
     │   ├── Label.js
     │   ├── Notification.js
+    │   ├── PermissionAuditLog.js # 🔐 Audit trail
     │   ├── Project.js
-    │   ├── ProjectMember.js
+    │   ├── ProjectMember.js      # 🔐 + new project roles
+    │   ├── RbacPermission.js     # 🔐 Permission definitions
+    │   ├── RolePermission.js     # 🔐 Role-permission mapping
     │   ├── Sprint.js
     │   ├── Task.js
     │   ├── TaskLabel.js
     │   ├── Team.js
-    │   ├── TeamMember.js
+    │   ├── TeamMember.js         # 🔐 + new team roles
     │   ├── TimeLog.js
-    │   └── User.js
+    │   ├── User.js               # 🔐 + system_role, institution_role
+    │   └── UserRoleAssignment.js # 🔐 Dynamic role assignment
     ├── routes/
-    │   ├── index.js          # Route aggregator
+    │   ├── index.js              # Route aggregator
     │   ├── activityRoutes.js
     │   ├── aiRoutes.js
     │   ├── attachmentRoutes.js
     │   ├── authRoutes.js
     │   ├── commentRoutes.js
     │   ├── departmentRoutes.js
+    │   ├── exampleRbacRoutes.js  # 🔐 RBAC usage examples
     │   ├── labelRoutes.js
     │   ├── notificationRoutes.js
     │   ├── projectRoutes.js
+    │   ├── rbacRoutes.js         # 🔐 RBAC management API
+    │   ├── rbacRoutesV2.js       # 🔐 RBAC API v2
+    │   ├── reportRoutes.js
     │   ├── sprintRoutes.js
     │   ├── taskRoutes.js
     │   ├── teamRoutes.js
     │   ├── timeLogRoutes.js
     │   └── userRoutes.js
+    ├── seeders/
+    │   └── rbacSeeder.js         # 🔐 RBAC data seeder
     ├── services/
     │   ├── aiQueueService.js
-    │   └── geminiService.js
+    │   ├── geminiService.js
+    │   └── notificationService.js
     └── utils/
         ├── constants.js
         ├── dbSync.js
@@ -201,23 +240,13 @@ frontend/
     ├── App.jsx               # Main component with routing
     ├── components/
     │   ├── ai/
-    │   │   ├── AiButton.jsx
-    │   │   ├── AiChatPanel.jsx
-    │   │   ├── AiChatPanelStream.jsx
-    │   │   ├── AiInsightsPanel.jsx
-    │   │   └── AiSuggestionPanel.jsx
     │   ├── auth/
     │   │   └── PrivateRoute.jsx
     │   ├── common/
-    │   │   ├── Button.jsx
-    │   │   ├── Card.jsx
-    │   │   ├── Input.jsx
-    │   │   └── ...
     │   ├── kanban/
     │   ├── layout/
     │   │   └── Header.jsx
     │   ├── notification/
-    │   │   └── NotificationDropdown.jsx
     │   ├── profile/
     │   └── task/
     ├── contexts/
@@ -232,13 +261,15 @@ frontend/
     │   ├── Projects.jsx
     │   ├── Register.jsx
     │   ├── SprintPage.jsx
-    │   └── TeamManagement.jsx
+    │   ├── TeamManagement.jsx
+    │   └── UserRoleManagement.jsx  # 🔐 RBAC management UI
     ├── services/
-    │   ├── api.js            # Axios instance
+    │   ├── api.js
     │   ├── aiService.js
     │   ├── authService.js
     │   ├── commentService.js
     │   ├── projectService.js
+    │   ├── rbacService.js    # 🔐 RBAC API service
     │   ├── sprintService.js
     │   ├── taskService.js
     │   ├── teamService.js
@@ -251,43 +282,54 @@ frontend/
 
 ## 4. Database Schema
 
-### 4.1 Entity Relationship Diagram
+### 4.1 Complete ERD with RBAC
 
 ```
-┌─────────────┐     ┌─────────────────┐     ┌─────────────┐
-│    Users    │────<│  ProjectMembers │>────│   Projects  │
-└─────────────┘     └─────────────────┘     └─────────────┘
-       │                                           │
-       │                                           │
-       ▼                                           ▼
-┌─────────────┐                            ┌─────────────┐
-│ TeamMembers │>───────────────────────────│   Sprints   │
-└─────────────┘                            └─────────────┘
-       │                                           │
-       ▼                                           │
-┌─────────────┐                                    │
-│    Teams    │                                    │
-└─────────────┘                                    │
-       │                                           ▼
-       ▼                                    ┌─────────────┐
-┌─────────────┐                            │    Tasks    │
-│ Departments │                            └─────────────┘
-└─────────────┘                                    │
-                                    ┌──────────────┼──────────────┐
-                                    ▼              ▼              ▼
-                             ┌───────────┐  ┌───────────┐  ┌───────────┐
-                             │ Comments  │  │TaskLabels │  │Attachments│
-                             └───────────┘  └───────────┘  └───────────┘
-                                                  │
-                                                  ▼
-                                           ┌───────────┐
-                                           │  Labels   │
-                                           └───────────┘
+┌─────────────────┐     ┌──────────────────────┐     ┌─────────────────┐
+│     Users       │────<│  department_members  │>────│   Departments   │
+│                 │     └──────────────────────┘     │                 │
+│ + system_role   │                                  │                 │
+│ + institution_  │     ┌──────────────────────┐     │                 │
+│   role          │────<│    team_members      │>────│     Teams       │
+└─────────────────┘     │                      │     └─────────────────┘
+         │              │ + team_admin         │
+         │              │ + scrum_master       │
+         │              │ + product_owner      │
+         │              │ + qa_lead            │
+         │              └──────────────────────┘
+         │
+         │              ┌──────────────────────┐     ┌─────────────────┐
+         └─────────────<│   project_members    │>────│    Projects     │
+                        │                      │     │                 │
+                        │ + project_owner      │     │                 │
+                        │ + tech_lead          │     │                 │
+                        │ + qa_tester          │     │                 │
+                        │ + stakeholder        │     │                 │
+                        └──────────────────────┘     └─────────────────┘
+
+┌─────────────────┐     ┌──────────────────────┐
+│rbac_permissions │────<│  role_permissions    │
+│                 │     │                      │
+│ code            │     │ + is_conditional     │
+│ category        │     │ + condition_type     │
+└─────────────────┘     └──────────────────────┘
+
+┌─────────────────┐     ┌──────────────────────┐
+│     Users       │────<│user_role_assignments │
+│                 │     │                      │
+│                 │     │ + valid_from         │
+│                 │     │ + valid_until        │
+│                 │     └──────────────────────┘
+│                 │
+│                 │     ┌──────────────────────┐
+│                 │────<│permission_audit_logs │
+│                 │     │                      │
+└─────────────────┘     └──────────────────────┘
 ```
 
-### 4.2 Tabel-Tabel Utama
+### 4.2 Core Tables
 
-#### Users
+#### Users (Updated with RBAC)
 
 ```sql
 CREATE TABLE users (
@@ -298,284 +340,476 @@ CREATE TABLE users (
   full_name VARCHAR(100),
   avatar_url VARCHAR(255),
   role ENUM('admin', 'project_manager', 'developer', 'viewer') DEFAULT 'developer',
+  -- 🔐 NEW RBAC Fields
+  system_role ENUM('super_admin', 'admin', 'security_officer', 'ai_admin') NULL,
+  institution_role VARCHAR(50) NULL COMMENT 'Jabatan: Superadmin, Admin Sistem, Manager, HRD, Kepala Divisi, Project Manager, Staff',
   status ENUM('active', 'inactive', 'suspended') DEFAULT 'active',
   last_login DATETIME,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_users_system_role (system_role),
+  INDEX idx_users_institution_role (institution_role)
 );
 ```
 
-#### Projects
+#### Department Members (NEW - RBAC)
 
 ```sql
-CREATE TABLE projects (
+CREATE TABLE department_members (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(100) NOT NULL,
-  description TEXT,
-  key VARCHAR(10) UNIQUE NOT NULL,
-  owner_id INT REFERENCES users(id),
-  status ENUM('planning', 'active', 'on_hold', 'completed', 'archived') DEFAULT 'planning',
-  start_date DATE,
-  end_date DATE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-#### Tasks
-
-```sql
-CREATE TABLE tasks (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  title VARCHAR(255) NOT NULL,
-  description TEXT,
-  project_id INT REFERENCES projects(id),
-  sprint_id INT REFERENCES sprints(id),
-  assignee_id INT REFERENCES users(id),
-  reporter_id INT REFERENCES users(id),
-  status ENUM('backlog', 'todo', 'in_progress', 'in_review', 'done') DEFAULT 'backlog',
-  priority ENUM('lowest', 'low', 'medium', 'high', 'highest') DEFAULT 'medium',
-  task_type ENUM('story', 'bug', 'task', 'epic', 'subtask') DEFAULT 'task',
-  story_points INT,
-  due_date DATE,
-  position INT DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-#### Sprints
-
-```sql
-CREATE TABLE sprints (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(100) NOT NULL,
-  goal TEXT,
-  project_id INT REFERENCES projects(id),
-  status ENUM('planning', 'active', 'completed') DEFAULT 'planning',
-  start_date DATE,
-  end_date DATE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-#### Departments
-
-```sql
-CREATE TABLE departments (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(100) NOT NULL,
-  code VARCHAR(20) UNIQUE NOT NULL,
-  description TEXT,
-  parent_id INT REFERENCES departments(id),
-  head_user_id INT REFERENCES users(id),
-  level INT DEFAULT 0,
-  "order" INT DEFAULT 0,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-#### Teams
-
-```sql
-CREATE TABLE teams (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  name VARCHAR(100) NOT NULL,
-  description TEXT,
-  department_id INT REFERENCES departments(id),
-  lead_user_id INT REFERENCES users(id),
-  color VARCHAR(7) DEFAULT '#3B82F6',
-  max_members INT,
-  is_active BOOLEAN DEFAULT TRUE,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-```
-
-#### Team Members
-
-```sql
-CREATE TABLE team_members (
-  id INT PRIMARY KEY AUTO_INCREMENT,
-  team_id INT REFERENCES teams(id),
-  user_id INT REFERENCES users(id),
-  role ENUM('member', 'lead', 'admin') DEFAULT 'member',
-  position VARCHAR(100),
+  department_id INT NOT NULL,
+  user_id INT NOT NULL,
+  role ENUM('division_head', 'division_manager', 'division_viewer', 'hr_reviewer')
+       NOT NULL DEFAULT 'division_viewer',
+  position VARCHAR(100) NULL,
+  is_head BOOLEAN DEFAULT FALSE,
   joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   is_active BOOLEAN DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  UNIQUE KEY (team_id, user_id)
+
+  FOREIGN KEY (department_id) REFERENCES departments(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_dept_user (department_id, user_id),
+  INDEX idx_dept_members_role (role)
 );
 ```
 
-#### Notifications
+#### Team Members (Updated with RBAC)
 
 ```sql
-CREATE TABLE notifications (
+CREATE TABLE team_members (
   id INT PRIMARY KEY AUTO_INCREMENT,
-  user_id INT REFERENCES users(id),
-  type VARCHAR(50) NOT NULL,
-  title VARCHAR(255) NOT NULL,
-  message TEXT,
-  data JSON,
-  is_read BOOLEAN DEFAULT FALSE,
-  read_at DATETIME,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  team_id INT NOT NULL,
+  user_id INT NOT NULL,
+  role ENUM(
+    'member', 'lead', 'admin',  -- Legacy roles
+    'team_admin', 'team_lead', 'scrum_master',
+    'product_owner', 'qa_lead'  -- 🔐 New RBAC roles
+  ) DEFAULT 'member',
+  position VARCHAR(100) NULL,
+  specialization VARCHAR(100) NULL COMMENT 'frontend, backend, devops, qa, etc.',
+  capacity_percentage INT DEFAULT 100 COMMENT '0-100%',
+  joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  UNIQUE KEY (team_id, user_id),
+  INDEX idx_team_members_role (role)
+);
+```
+
+#### Project Members (Updated with RBAC)
+
+```sql
+CREATE TABLE project_members (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  project_id INT NOT NULL,
+  user_id INT NOT NULL,
+  role ENUM(
+    'owner', 'manager', 'developer', 'viewer',  -- Legacy roles
+    'project_owner', 'project_manager', 'tech_lead',
+    'qa_tester', 'report_viewer', 'stakeholder'  -- 🔐 New RBAC roles
+  ) DEFAULT 'developer',
+  is_primary BOOLEAN DEFAULT FALSE,
+  allocation_percentage INT DEFAULT 100 COMMENT '0-100%',
+  can_approve BOOLEAN DEFAULT FALSE,
+  joined_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+  UNIQUE KEY (project_id, user_id),
+  INDEX idx_project_members_role (role)
+);
+```
+
+### 4.3 RBAC Tables (NEW)
+
+#### RBAC Permissions
+
+```sql
+CREATE TABLE rbac_permissions (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  code VARCHAR(100) NOT NULL UNIQUE,
+  name VARCHAR(255) NOT NULL,
+  description TEXT NULL,
+  category ENUM('system', 'division', 'team', 'project', 'common') NOT NULL DEFAULT 'common',
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_permissions_code (code),
+  INDEX idx_permissions_category (category)
+);
+```
+
+#### Role Permissions
+
+```sql
+CREATE TABLE role_permissions (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  role_type ENUM('system', 'division', 'team', 'project') NOT NULL,
+  role_name VARCHAR(50) NOT NULL,
+  permission_id INT NOT NULL,
+  is_conditional BOOLEAN DEFAULT FALSE,
+  condition_type VARCHAR(50) NULL COMMENT 'own_only, partial, qa_fields_only',
+  condition_config JSON NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (permission_id) REFERENCES rbac_permissions(id) ON DELETE CASCADE,
+  UNIQUE KEY unique_role_permission (role_type, role_name, permission_id)
+);
+```
+
+#### User Role Assignments
+
+```sql
+CREATE TABLE user_role_assignments (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL,
+  role_type ENUM('system', 'division', 'team', 'project') NOT NULL,
+  role_name VARCHAR(50) NOT NULL,
+  resource_type VARCHAR(50) NULL COMMENT 'department, team, project',
+  resource_id INT NULL,
+  assigned_by INT NOT NULL,
+  valid_from DATETIME DEFAULT CURRENT_TIMESTAMP,
+  valid_until DATETIME NULL COMMENT 'NULL = permanent',
+  is_active BOOLEAN DEFAULT TRUE,
+  notes TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (assigned_by) REFERENCES users(id) ON DELETE SET NULL,
+  INDEX idx_role_assign_validity (valid_from, valid_until)
+);
+```
+
+#### Permission Audit Logs
+
+```sql
+CREATE TABLE permission_audit_logs (
+  id INT PRIMARY KEY AUTO_INCREMENT,
+  user_id INT NOT NULL COMMENT 'User yang melakukan perubahan',
+  target_user_id INT NOT NULL COMMENT 'User yang rolenya diubah',
+  action ENUM('grant', 'revoke', 'modify') NOT NULL,
+  role_type VARCHAR(50) NOT NULL,
+  role_name VARCHAR(50) NOT NULL,
+  resource_type VARCHAR(50) NULL,
+  resource_id INT NULL,
+  old_role VARCHAR(50) NULL,
+  new_role VARCHAR(50) NULL,
+  reason TEXT NULL,
+  ip_address VARCHAR(45) NULL,
+  user_agent TEXT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
+  FOREIGN KEY (target_user_id) REFERENCES users(id) ON DELETE CASCADE,
+  INDEX idx_perm_audit_created (created_at)
 );
 ```
 
 ---
 
-## 5. Sistem Role & Hak Akses
+## 5. Enterprise RBAC System
 
-### 5.1 Struktur Role 3 Layer
+### 5.1 Konsep Multi-Layer RBAC
+
+Enterprise RBAC System mengimplementasikan **4-layer role hierarchy** dengan prioritas resolusi:
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                         SYSTEM LEVEL ROLES                               │
-│                        (Global - Tabel Users)                            │
-│  ┌──────────┐   ┌─────────────────┐   ┌───────────┐   ┌──────────┐     │
-│  │  admin   │ → │ project_manager │ → │ developer │ → │  viewer  │     │
-│  └──────────┘   └─────────────────┘   └───────────┘   └──────────┘     │
-│   Full Access    Manage Projects      Work on Tasks    View Only        │
-│                  & Teams                                                 │
-└─────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────┐
-│                        PROJECT LEVEL ROLES                               │
-│                    (Per Project - Tabel ProjectMembers)                  │
-│  ┌──────────┐   ┌───────────┐   ┌───────────┐   ┌──────────┐           │
-│  │  owner   │ → │  manager  │ → │ developer │ → │  viewer  │           │
-│  └──────────┘   └───────────┘   └───────────┘   └──────────┘           │
-│   Project        Project Mgr     Dev Team        View Only              │
-│   Owner                                                                  │
-└─────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────┐
-│                          TEAM LEVEL ROLES                                │
-│                      (Per Team - Tabel TeamMembers)                      │
-│       ┌──────────┐       ┌──────────┐       ┌──────────┐               │
-│       │  admin   │   →   │   lead   │   →   │  member  │               │
-│       └──────────┘       └──────────┘       └──────────┘               │
-│        Team Admin         Team Lead          Anggota                    │
-└─────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    PRIORITY: SYSTEM > DIVISION > TEAM > PROJECT             │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                              │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                       SYSTEM LEVEL (Global)                          │   │
+│   │    super_admin │ admin │ security_officer │ ai_admin                 │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                    ▼                                         │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                      DIVISION LEVEL (Per Divisi)                     │   │
+│   │    division_head │ division_manager │ division_viewer │ hr_reviewer  │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                    ▼                                         │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                       TEAM LEVEL (Per Team)                          │   │
+│   │   team_admin │ team_lead │ scrum_master │ product_owner │ qa_lead   │   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                    ▼                                         │
+│   ┌─────────────────────────────────────────────────────────────────────┐   │
+│   │                     PROJECT LEVEL (Per Project)                      │   │
+│   │  project_owner │ project_manager │ tech_lead │ qa_tester │ developer│   │
+│   └─────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### 5.2 Matriks Hak Akses Detail
+**Formula Effective Permission:**
 
-#### A. Manajemen User
+```
+FinalAccess = SystemRole ∪ DivisionRole ∪ TeamRole ∪ ProjectRole
+```
 
-| Action           | admin | project_manager | developer | viewer |
-| ---------------- | :---: | :-------------: | :-------: | :----: |
-| View All Users   |  ✅   |       ✅        |    ✅     |   ✅   |
-| Create User      |  ✅   |       ❌        |    ❌     |   ❌   |
-| Edit Any User    |  ✅   |       ❌        |    ❌     |   ❌   |
-| Edit Own Profile |  ✅   |       ✅        |    ✅     |   ✅   |
-| Delete User      |  ✅   |       ❌        |    ❌     |   ❌   |
-| Change User Role |  ✅   |       ❌        |    ❌     |   ❌   |
+### 5.2 Role Definitions
 
-#### B. Manajemen Project
+#### 5.2.1 System-Level Roles
 
-| Action              | admin | project_manager | developer | viewer |
-| ------------------- | :---: | :-------------: | :-------: | :----: |
-| View All Projects   |  ✅   |       ✅        |    ✅     |   ✅   |
-| Create Project      |  ✅   |       ✅        |    ❌     |   ❌   |
-| Edit Project        |  ✅   |    ✅ (own)     |    ❌     |   ❌   |
-| Delete Project      |  ✅   |    ✅ (own)     |    ❌     |   ❌   |
-| Add Project Members |  ✅   |    ✅ (own)     |    ❌     |   ❌   |
+| Role               | Deskripsi                                                      | Override |
+| ------------------ | -------------------------------------------------------------- | -------- |
+| `super_admin`      | Full access ke seluruh sistem, dapat override semua permission | ✅ Ya    |
+| `admin`            | Manage users, departments, teams, projects                     | ❌ Tidak |
+| `security_officer` | Audit logs dan security monitoring                             | ❌ Tidak |
+| `ai_admin`         | Konfigurasi AI settings                                        | ❌ Tidak |
 
-#### C. Manajemen Task
+#### 5.2.2 Division-Level Roles
 
-| Action             | admin | project_manager |   developer   | viewer |
-| ------------------ | :---: | :-------------: | :-----------: | :----: |
-| View Tasks         |  ✅   |       ✅        |      ✅       |   ✅   |
-| Create Task        |  ✅   |       ✅        |      ✅       |   ❌   |
-| Edit Task          |  ✅   |       ✅        | ✅ (assigned) |   ❌   |
-| Delete Task        |  ✅   |       ✅        |      ❌       |   ❌   |
-| Change Task Status |  ✅   |       ✅        | ✅ (assigned) |   ❌   |
-| Assign Task        |  ✅   |       ✅        |      ❌       |   ❌   |
+| Role               | Deskripsi                                     |
+| ------------------ | --------------------------------------------- |
+| `division_head`    | Kepala divisi - full access dalam divisi      |
+| `division_manager` | Manager divisi - manage tapi tidak bisa hapus |
+| `division_viewer`  | Hanya lihat data divisi                       |
+| `hr_reviewer`      | HRD - approve workflow, cuti, delegasi        |
 
-#### D. Manajemen Sprint
+#### 5.2.3 Team-Level Roles
 
-| Action           | admin | project_manager | developer | viewer |
-| ---------------- | :---: | :-------------: | :-------: | :----: |
-| View Sprints     |  ✅   |       ✅        |    ✅     |   ✅   |
-| Create Sprint    |  ✅   |       ✅        |    ❌     |   ❌   |
-| Edit Sprint      |  ✅   |       ✅        |    ❌     |   ❌   |
-| Delete Sprint    |  ✅   |       ✅        |    ❌     |   ❌   |
-| Start/End Sprint |  ✅   |       ✅        |    ❌     |   ❌   |
+| Role            | Deskripsi                         |
+| --------------- | --------------------------------- |
+| `team_admin`    | Admin tim - full access tim       |
+| `team_lead`     | Lead tim - manage members & tasks |
+| `scrum_master`  | Manage sprint & ceremonies        |
+| `product_owner` | Prioritize backlog                |
+| `qa_lead`       | QA approval & testing             |
+| `member`        | Anggota biasa                     |
 
-#### E. Manajemen Department
+#### 5.2.4 Project-Level Roles
 
-| Action            | admin | project_manager | developer | viewer |
-| ----------------- | :---: | :-------------: | :-------: | :----: |
-| View Departments  |  ✅   |       ✅        |    ✅     |   ✅   |
-| Create Department |  ✅   |       ❌        |    ❌     |   ❌   |
-| Edit Department   |  ✅   |       ❌        |    ❌     |   ❌   |
-| Delete Department |  ✅   |       ❌        |    ❌     |   ❌   |
+| Role              | Deskripsi                                 |
+| ----------------- | ----------------------------------------- |
+| `project_owner`   | Pemilik project - full access             |
+| `project_manager` | Manager project - manage tapi tidak hapus |
+| `tech_lead`       | Technical lead - edit sprint & tasks      |
+| `qa_tester`       | QA testing - edit QA fields only          |
+| `developer`       | Developer - edit own tasks                |
+| `report_viewer`   | Hanya lihat report                        |
+| `stakeholder`     | External stakeholder - view only          |
 
-#### F. Manajemen Team
+### 5.3 RBAC Permission Matrix
 
-| Action             | admin | project_manager | developer | viewer |
-| ------------------ | :---: | :-------------: | :-------: | :----: |
-| View Teams         |  ✅   |       ✅        |    ✅     |   ✅   |
-| Create Team        |  ✅   |       ✅        |    ❌     |   ❌   |
-| Edit Team          |  ✅   |       ✅        |    ❌     |   ❌   |
-| Delete Team        |  ✅   |       ❌        |    ❌     |   ❌   |
-| Add Team Member    |  ✅   |       ✅        |    ❌     |   ❌   |
-| Remove Team Member |  ✅   |       ✅        |    ❌     |   ❌   |
-| Update Member Role |  ✅   |       ✅        |    ❌     |   ❌   |
+#### 5.3.1 System-Level Permissions
 
-### 5.3 Implementasi Role Check
+| Aksi                    | super_admin | admin | security_officer | ai_admin |
+| ----------------------- | :---------: | :---: | :--------------: | :------: |
+| Kelola seluruh pengguna |     ✅      |  ✅   |        ❌        |    ❌    |
+| Kelola roles global     |     ✅      |  ✅   |        ❌        |    ❌    |
+| Kelola departments      |     ✅      |  ✅   |        ❌        |    ❌    |
+| Kelola teams            |     ✅      |  ✅   |        ❌        |    ❌    |
+| Kelola semua project    |     ✅      |  ✅   |        ❌        |    ❌    |
+| Lihat audit logs        |     ✅      |  🟧   |        ✅        |    ❌    |
+| Kelola audit logs       |     ✅      |  ❌   |        ✅        |    ❌    |
+| Kelola AI               |     ✅      |  ✅   |        ❌        |    ✅    |
+| Override permission     |     ✅      |  ❌   |        ❌        |    ❌    |
+| Lihat semua report      |     ✅      |  ✅   |        ✅        |    ✅    |
 
-#### Backend Middleware (`roleCheck.js`)
+**Legend:** ✅ = Full Access | 🟧 = Conditional/Partial | ❌ = No Access
+
+#### 5.3.2 Division-Level Permissions
+
+| Aksi                       | division_head | division_manager | division_viewer | hr_reviewer |
+| -------------------------- | :-----------: | :--------------: | :-------------: | :---------: |
+| Lihat semua project divisi |      ✅       |        ✅        |       ✅        |     🟧      |
+| Buat project               |      ✅       |        ✅        |       ❌        |     ❌      |
+| Edit project               |      ✅       |        ✅        |       ❌        |     ❌      |
+| Hapus project              |      ✅       |        ❌        |       ❌        |     ❌      |
+| Lihat sprint/task divisi   |      ✅       |        ✅        |       🟧        |     🟧      |
+| Approve workflow           |      ✅       |        ✅        |       ❌        |     ✅      |
+| Kelola anggota divisi      |      ✅       |        ✅        |       ❌        |     ❌      |
+| Kelola tim                 |      ✅       |        ✅        |       ❌        |     ❌      |
+| Cuti & delegasi otomatis   |      ❌       |        ❌        |       ❌        |     ✅      |
+
+#### 5.3.3 Team-Level Permissions
+
+| Aksi                | team_admin | team_lead | scrum_master | product_owner | qa_lead | member |
+| ------------------- | :--------: | :-------: | :----------: | :-----------: | :-----: | :----: |
+| Manage team members |     ✅     |    🟧     |      ❌      |      ❌       |   ❌    |   ❌   |
+| Assign task         |     ✅     |    ✅     |      ✅      |      ✅       |   ❌    |   ❌   |
+| Prioritize backlog  |     ✅     |    ✅     |      ❌      |      ✅       |   ❌    |   ❌   |
+| Manage sprint       |     ✅     |    ✅     |      ✅      |      ❌       |   ❌    |   ❌   |
+| Start/end sprint    |     ✅     |    ✅     |      ✅      |      ❌       |   ❌    |   ❌   |
+| QA approval         |     ❌     |    ❌     |      ❌      |      ❌       |   ✅    |   ❌   |
+| Edit task           |     ✅     |    ✅     |      ✅      |      ✅       |   ✅    |   🟧   |
+| Move task kanban    |     ✅     |    ✅     |      ✅      |      ✅       |   ✅    |   ✅   |
+| Delete task         |     ✅     |    ✅     |      ❌      |      ❌       |   ❌    |   ❌   |
+
+#### 5.3.4 Project-Level Permissions
+
+| Aksi                | project_owner | project_manager | tech_lead | qa_tester | developer | report_viewer | stakeholder |
+| ------------------- | :-----------: | :-------------: | :-------: | :-------: | :-------: | :-----------: | :---------: |
+| Edit project        |      ✅       |       ✅        |    ❌     |    ❌     |    ❌     |      ❌       |     ❌      |
+| Delete project      |      ✅       |       ❌        |    ❌     |    ❌     |    ❌     |      ❌       |     ❌      |
+| Create sprint       |      ✅       |       ✅        |    ❌     |    ❌     |    ❌     |      ❌       |     ❌      |
+| Edit sprint         |      ✅       |       ✅        |    🟧     |    ❌     |    ❌     |      ❌       |     ❌      |
+| Create task         |      ✅       |       ✅        |    ✅     |    ❌     |    ✅     |      ❌       |     ❌      |
+| Edit task           |      ✅       |       ✅        |    ✅     |    🟧     |    🟧     |      ❌       |     ❌      |
+| QA testing          |      ❌       |       ❌        |    ❌     |    ✅     |    ❌     |      ❌       |     ❌      |
+| Change status       |      ✅       |       ✅        |    ✅     |    ✅     |    🟧     |      ❌       |     ❌      |
+| View report         |      ✅       |       ✅        |    ✅     |    ✅     |    🟧     |      ✅       |     ✅      |
+| Workload management |      ✅       |       ✅        |    ✅     |    ❌     |    ❌     |      ❌       |     ❌      |
+
+### 5.4 Conditional Permissions
+
+| Rule Key                        | Condition        | Deskripsi                                                    |
+| ------------------------------- | ---------------- | ------------------------------------------------------------ |
+| `member:edit_task`              | `own_only`       | Member hanya bisa edit task yang di-assign ke dirinya        |
+| `developer:edit_task_details`   | `own_only`       | Developer hanya bisa edit task sendiri                       |
+| `developer:change_task_status`  | `own_only`       | Developer hanya bisa ubah status task sendiri                |
+| `qa_tester:edit_task_details`   | `qa_fields_only` | QA hanya bisa edit field: qa_status, test_notes, bug_details |
+| `tech_lead:edit_sprint`         | `partial`        | Tech lead bisa edit detail tapi tidak start/complete         |
+| `team_lead:manage_team_members` | `partial`        | Bisa add/remove tapi tidak bisa assign role admin            |
+| `admin:view_audit_logs`         | `partial`        | Bisa lihat log tapi tanpa sensitive data                     |
+
+### 5.5 Institution Mapping
+
+#### Role Jabatan Instansi → System Role
+
+| Jabatan Instansi | System Role   | Division Role      |
+| ---------------- | ------------- | ------------------ |
+| Superadmin       | `super_admin` | -                  |
+| Admin Sistem     | `admin`       | -                  |
+| Manager          | -             | `division_manager` |
+| HRD              | -             | `hr_reviewer`      |
+| Kepala Divisi    | -             | `division_head`    |
+| Project Manager  | -             | `project_manager`  |
+| Staff            | -             | `member`           |
+
+#### Divisi Instansi → Department
+
+| Divisi          | Department Code | Deskripsi                       |
+| --------------- | --------------- | ------------------------------- |
+| IT              | `IT`            | Information Technology Division |
+| HRD             | `HRD`           | Human Resources Development     |
+| Finance         | `FIN`           | Finance Division                |
+| Admin Marketing | `ADM`           | Admin Marketing Division        |
+| Marketing       | `MKT`           | Marketing Division              |
+| Instruktur      | `INS`           | Instructor Division             |
+
+#### Project Instansi
+
+| Project               | Code    | Deskripsi                             |
+| --------------------- | ------- | ------------------------------------- |
+| Aplikasi              | `APP`   | Internal Application Development      |
+| Instruktur            | `INS`   | Instructor Management System          |
+| Muliartha             | `MUL`   | Muliartha Project                     |
+| LSP Digital Marketing | `LSPDM` | LSP Digital Marketing                 |
+| LSP AI Indonesia      | `LSPAI` | LSP Artificial Intelligence Indonesia |
+| Asosiasi AI           | `AAI`   | Asosiasi Artificial Intelligence      |
+| Digimind              | `DGM`   | Digimind Project                      |
+
+### 5.6 Middleware Implementation
+
+#### Basic Usage
 
 ```javascript
-const roleCheck = (allowedRoles) => {
-  return (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({
-        success: false,
-        message: "Authentication required",
-      });
-    }
+const {
+  roleCheckAdvanced,
+  SYSTEM_ROLES,
+  PERMISSIONS,
+} = require("../middleware/roleCheckAdvanced");
 
-    if (!allowedRoles.includes(req.user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: "You do not have permission to perform this action",
-      });
-    }
+// Check specific roles
+router.post(
+  "/projects",
+  auth,
+  roleCheckAdvanced({
+    roles: [SYSTEM_ROLES.SUPER_ADMIN, SYSTEM_ROLES.ADMIN],
+  }),
+  createProject
+);
 
-    next();
-  };
-};
+// Check specific permissions
+router.post(
+  "/tasks",
+  auth,
+  roleCheckAdvanced({
+    permissions: [PERMISSIONS.CREATE_TASK],
+  }),
+  createTask
+);
+
+// Combined roles + permissions with ownership check
+router.put(
+  "/tasks/:id",
+  auth,
+  roleCheckAdvanced({
+    roles: [PROJECT_ROLES.PROJECT_MANAGER, PROJECT_ROLES.TECH_LEAD],
+    permissions: [PERMISSIONS.EDIT_TASK],
+    checkOwnership: true,
+    resourceType: "task",
+    resourceIdParam: "id",
+  }),
+  updateTask
+);
 ```
 
-#### Frontend Context (`AuthContext.jsx`)
+#### Convenience Middlewares
 
 ```javascript
-// Role check helpers
-const isAdmin = () => user?.role === "admin";
-const isProjectManager = () => user?.role === "project_manager";
-const isDeveloper = () => user?.role === "developer";
-const isViewer = () => user?.role === "viewer";
+const {
+  requireSystemAdmin,
+  requireSuperAdmin,
+  requireDivisionLead,
+  requireProjectManager,
+  requireSprintManager,
+  requireTaskEditor,
+  requireTeamManager,
+  requireAiAdmin,
+} = require("../middleware/roleCheckAdvanced");
 
-// Permission helpers
-const canManageDepartments = () => isAdmin();
-const canManageTeams = () => isAdmin() || isProjectManager();
-const canEditTasks = () => !isViewer();
-const canViewOnly = () => isViewer();
+// Quick shortcuts
+router.delete("/users/:id", auth, requireSuperAdmin(), deleteUser);
+router.post("/sprints/:id/start", auth, requireSprintManager(), startSprint);
+router.put("/ai/settings", auth, requireAiAdmin(), updateAiSettings);
+```
 
-// Check if user has any of the specified roles
-const hasRole = (roles) => {
-  if (!user?.role) return false;
-  return roles.includes(user.role);
-};
+### 5.7 Usage Scenarios
+
+#### Scenario 1: Developer Edit Own Task
+
+```javascript
+// Developer wants to edit task assigned to them
+PUT /api/tasks/123
+Authorization: Bearer <token>
+
+// Middleware checks:
+// 1. User has permission EDIT_TASK? → Conditional (own_only)
+// 2. Is task.assigned_to === user.id? → Yes
+// 3. Result: ALLOWED
+```
+
+#### Scenario 2: Scrum Master Start Sprint
+
+```javascript
+// Scrum Master wants to start sprint
+POST /api/sprints/5/start
+Authorization: Bearer <token>
+
+// Middleware checks:
+// 1. User has role scrum_master? → Yes
+// 2. User has permission START_END_SPRINT? → Yes
+// 3. Result: ALLOWED
+```
+
+#### Scenario 3: Super Admin Override
+
+```javascript
+// Super Admin always has access to everything
+DELETE /api/projects/5
+Authorization: Bearer <super_admin_token>
+
+// Middleware checks:
+// 1. User has system_role === 'super_admin'? → Yes
+// 2. Result: ALLOWED (bypass all other checks)
 ```
 
 ---
@@ -589,18 +823,8 @@ const hasRole = (roles) => {
 ```
 ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
 │  Login   │ →  │  POST    │ →  │ Validate │ →  │  Return  │
-│  Form    │    │  /auth/  │    │ Password │    │   JWT    │
-│          │    │  login   │    │ & User   │    │  Token   │
-└──────────┘    └──────────┘    └──────────┘    └──────────┘
-```
-
-#### Register Flow
-
-```
-┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│ Register │ →  │  POST    │ →  │  Create  │ →  │  Auto    │
-│   Form   │    │  /auth/  │    │   User   │    │  Login   │
-│          │    │ register │    │          │    │          │
+│  Form    │    │  /auth/  │    │ Password │    │ JWT +    │
+│          │    │  login   │    │ & User   │    │ Roles    │
 └──────────┘    └──────────┘    └──────────┘    └──────────┘
 ```
 
@@ -624,20 +848,6 @@ const hasRole = (roles) => {
 └──────────┘    └──────────┘    └───────────┘    └───────────┘    └──────────┘
 ```
 
-#### Task Priority Levels
-
-```
-⬇️ Lowest → ↓ Low → ➡️ Medium → ↑ High → ⬆️ Highest
-```
-
-#### Task Types
-
-- 📖 Story - User story atau fitur
-- 🐛 Bug - Bug/defect yang perlu diperbaiki
-- ✅ Task - Task teknis
-- 🎯 Epic - Kumpulan stories
-- 📝 Subtask - Bagian dari task lain
-
 ### 6.4 Sprint Management
 
 #### Sprint Lifecycle
@@ -652,27 +862,32 @@ const hasRole = (roles) => {
   Set Goals    Daily Standups   Retrospective
 ```
 
-### 6.5 Team Management
+### 6.5 Team & Organization Management
 
 #### Organization Structure
 
 ```
-┌────────────────────────────────────────────────────────┐
-│                     ORGANIZATION                        │
-│                                                         │
-│  ┌─────────────────┐     ┌─────────────────┐           │
-│  │   Department A  │     │   Department B  │           │
-│  │  (e.g., IT)     │     │  (e.g., HR)     │           │
-│  └────────┬────────┘     └────────┬────────┘           │
-│           │                       │                     │
-│     ┌─────┴─────┐           ┌─────┴─────┐              │
-│     │           │           │           │               │
-│  ┌──┴──┐     ┌──┴──┐     ┌──┴──┐     ┌──┴──┐          │
-│  │Team │     │Team │     │Team │     │Team │          │
-│  │  1  │     │  2  │     │  3  │     │  4  │          │
-│  └─────┘     └─────┘     └─────┘     └─────┘          │
-│                                                         │
-└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│                     ORGANIZATION                            │
+│                                                             │
+│  ┌─────────────────┐     ┌─────────────────┐               │
+│  │   Department    │     │   Department    │               │
+│  │  (IT Division)  │     │ (HRD Division)  │               │
+│  │                 │     │                 │               │
+│  │ division_head   │     │ hr_reviewer     │               │
+│  └────────┬────────┘     └────────┬────────┘               │
+│           │                       │                         │
+│     ┌─────┴─────┐           ┌─────┴─────┐                  │
+│     │           │           │           │                   │
+│  ┌──┴──┐     ┌──┴──┐     ┌──┴──┐     ┌──┴──┐              │
+│  │Team │     │Team │     │Team │     │Team │              │
+│  │Dev  │     │ QA  │     │ HR  │     │Train│              │
+│  │     │     │     │     │     │     │     │              │
+│  │team_│     │qa_  │     │team_│     │team_│              │
+│  │lead │     │lead │     │lead │     │lead │              │
+│  └─────┘     └─────┘     └─────┘     └─────┘              │
+│                                                             │
+└────────────────────────────────────────────────────────────┘
 ```
 
 ### 6.6 Real-time Notifications (WebSocket)
@@ -687,18 +902,6 @@ const hasRole = (roles) => {
 └──────────┘    └──────────┘    └──────────┘    └──────────┘
 ```
 
-#### Notification Types
-
-| Type                 | Deskripsi                 |
-| -------------------- | ------------------------- |
-| `task_assigned`      | Task di-assign ke user    |
-| `task_updated`       | Task diupdate             |
-| `task_commented`     | Ada komentar baru di task |
-| `sprint_started`     | Sprint dimulai            |
-| `sprint_completed`   | Sprint selesai            |
-| `project_invitation` | Diundang ke project       |
-| `mention`            | Di-mention di komentar    |
-
 ### 6.7 AI Assistant (Gemini)
 
 #### AI Features
@@ -709,25 +912,13 @@ const hasRole = (roles) => {
 4. **Code Review** - Review kode otomatis
 5. **Daily Summary** - Ringkasan aktivitas harian
 
-#### AI Chat Flow
+### 6.8 RBAC Management (NEW!)
 
-```
-┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
-│   User   │ →  │  Queue   │ →  │  Gemini  │ →  │ Response │
-│  Query   │    │  System  │    │   API    │    │ Streamed │
-└──────────┘    └──────────┘    └──────────┘    └──────────┘
-```
-
-### 6.8 Dashboard & Reporting
-
-#### Dashboard Widgets
-
-- 📊 Project Progress Overview
-- 📈 Sprint Burndown Chart
-- 🎯 Task Distribution by Status
-- 👥 Team Workload
-- ⏱️ Time Tracking Summary
-- 🔔 Recent Activities
+- User Role Assignment
+- Permission Management
+- Dynamic Role Assignment dengan validity period
+- Permission Audit Logs
+- Role-Permission Mapping
 
 ---
 
@@ -735,161 +926,86 @@ const hasRole = (roles) => {
 
 ### 7.1 Authentication
 
-| Method | Endpoint                    | Description            | Auth |
-| ------ | --------------------------- | ---------------------- | ---- |
-| POST   | `/api/auth/register`        | Register user baru     | ❌   |
-| POST   | `/api/auth/login`           | Login user             | ❌   |
-| POST   | `/api/auth/logout`          | Logout user            | ✅   |
-| GET    | `/api/auth/me`              | Get current user       | ✅   |
-| POST   | `/api/auth/refresh`         | Refresh token          | ✅   |
-| POST   | `/api/auth/forgot-password` | Request reset password | ❌   |
-| POST   | `/api/auth/reset-password`  | Reset password         | ❌   |
+| Method | Endpoint             | Description                 | Auth |
+| ------ | -------------------- | --------------------------- | ---- |
+| POST   | `/api/auth/register` | Register user baru          | ❌   |
+| POST   | `/api/auth/login`    | Login user                  | ❌   |
+| POST   | `/api/auth/logout`   | Logout user                 | ✅   |
+| GET    | `/api/auth/me`       | Get current user with roles | ✅   |
+| POST   | `/api/auth/refresh`  | Refresh token               | ✅   |
 
-### 7.2 Users
+### 7.2 RBAC Management (NEW!)
 
-| Method | Endpoint                | Description    | Auth | Role       |
-| ------ | ----------------------- | -------------- | ---- | ---------- |
-| GET    | `/api/users`            | Get all users  | ✅   | All        |
-| GET    | `/api/users/:id`        | Get user by ID | ✅   | All        |
-| PUT    | `/api/users/:id`        | Update user    | ✅   | Admin/Self |
-| DELETE | `/api/users/:id`        | Delete user    | ✅   | Admin      |
-| PUT    | `/api/users/:id/avatar` | Update avatar  | ✅   | Admin/Self |
+| Method | Endpoint                              | Description                      | Auth | Role             |
+| ------ | ------------------------------------- | -------------------------------- | ---- | ---------------- |
+| GET    | `/api/rbac/permissions`               | Get all permissions              | ✅   | Admin            |
+| GET    | `/api/rbac/role-definitions`          | Get role definitions for UI      | ✅   | All              |
+| GET    | `/api/rbac/dashboard`                 | Get RBAC statistics              | ✅   | Admin            |
+| GET    | `/api/rbac/users/:userId/roles`       | Get user roles across all layers | ✅   | Admin            |
+| PUT    | `/api/rbac/users/:userId/system-role` | Update system role               | ✅   | Super Admin      |
+| POST   | `/api/rbac/users/:userId/assignments` | Create temporary role assignment | ✅   | Admin            |
+| GET    | `/api/rbac/my-permissions`            | Get current user's permissions   | ✅   | All              |
+| POST   | `/api/rbac/check-permission`          | Check specific permission        | ✅   | All              |
+| GET    | `/api/rbac/audit-logs`                | Get permission audit logs        | ✅   | Security Officer |
 
-### 7.3 Projects
+### 7.3 Projects (with RBAC)
 
-| Method | Endpoint                            | Description            | Auth | Role         |
-| ------ | ----------------------------------- | ---------------------- | ---- | ------------ |
-| GET    | `/api/projects`                     | Get all projects       | ✅   | All          |
-| POST   | `/api/projects`                     | Create project         | ✅   | Admin, PM    |
-| GET    | `/api/projects/:id`                 | Get project detail     | ✅   | All          |
-| PUT    | `/api/projects/:id`                 | Update project         | ✅   | Admin, Owner |
-| DELETE | `/api/projects/:id`                 | Delete project         | ✅   | Admin, Owner |
-| GET    | `/api/projects/:id/members`         | Get project members    | ✅   | All          |
-| POST   | `/api/projects/:id/members`         | Add member             | ✅   | Admin, Owner |
-| DELETE | `/api/projects/:id/members/:userId` | Remove member          | ✅   | Admin, Owner |
-| GET    | `/api/projects/:id/stats`           | Get project statistics | ✅   | All          |
+| Method | Endpoint                       | Description           | Auth | Permission       |
+| ------ | ------------------------------ | --------------------- | ---- | ---------------- |
+| GET    | `/api/projects`                | Get all user projects | ✅   | `view_project`   |
+| POST   | `/api/projects`                | Create project        | ✅   | `create_project` |
+| GET    | `/api/projects/:id`            | Get project detail    | ✅   | `view_project`   |
+| PUT    | `/api/projects/:id`            | Update project        | ✅   | `edit_project`   |
+| DELETE | `/api/projects/:id`            | Delete project        | ✅   | `delete_project` |
+| GET    | `/api/projects/:id/statistics` | Get project stats     | ✅   | `view_report`    |
 
-### 7.4 Tasks
+### 7.4 Tasks (with RBAC)
 
-| Method | Endpoint                | Description     | Auth | Role                |
-| ------ | ----------------------- | --------------- | ---- | ------------------- |
-| GET    | `/api/tasks`            | Get all tasks   | ✅   | All                 |
-| POST   | `/api/tasks`            | Create task     | ✅   | Admin, PM, Dev      |
-| GET    | `/api/tasks/:id`        | Get task detail | ✅   | All                 |
-| PUT    | `/api/tasks/:id`        | Update task     | ✅   | Admin, PM, Assignee |
-| DELETE | `/api/tasks/:id`        | Delete task     | ✅   | Admin, PM           |
-| PUT    | `/api/tasks/:id/status` | Update status   | ✅   | Admin, PM, Assignee |
-| PUT    | `/api/tasks/:id/assign` | Assign task     | ✅   | Admin, PM           |
-| PUT    | `/api/tasks/reorder`    | Reorder tasks   | ✅   | Admin, PM, Dev      |
-| GET    | `/api/tasks/my-tasks`   | Get my tasks    | ✅   | All                 |
+| Method | Endpoint                               | Description            | Auth | Permission                    |
+| ------ | -------------------------------------- | ---------------------- | ---- | ----------------------------- |
+| POST   | `/api/tasks/projects/:projectId/tasks` | Create task            | ✅   | `create_task`                 |
+| GET    | `/api/tasks/projects/:projectId/tasks` | Get project tasks      | ✅   | `view_task`                   |
+| GET    | `/api/tasks/:id`                       | Get task detail        | ✅   | `view_task`                   |
+| PUT    | `/api/tasks/:id`                       | Update task            | ✅   | `edit_task` / `edit_own_task` |
+| PUT    | `/api/tasks/:id/status`                | Update status (Kanban) | ✅   | `change_task_status`          |
+| DELETE | `/api/tasks/:id`                       | Delete task            | ✅   | `delete_task`                 |
 
-### 7.5 Sprints
+### 7.5 Sprints (with RBAC)
 
-| Method | Endpoint                    | Description       | Auth | Role      |
-| ------ | --------------------------- | ----------------- | ---- | --------- |
-| GET    | `/api/sprints`              | Get all sprints   | ✅   | All       |
-| POST   | `/api/sprints`              | Create sprint     | ✅   | Admin, PM |
-| GET    | `/api/sprints/:id`          | Get sprint detail | ✅   | All       |
-| PUT    | `/api/sprints/:id`          | Update sprint     | ✅   | Admin, PM |
-| DELETE | `/api/sprints/:id`          | Delete sprint     | ✅   | Admin, PM |
-| POST   | `/api/sprints/:id/start`    | Start sprint      | ✅   | Admin, PM |
-| POST   | `/api/sprints/:id/complete` | Complete sprint   | ✅   | Admin, PM |
-| GET    | `/api/sprints/:id/tasks`    | Get sprint tasks  | ✅   | All       |
+| Method | Endpoint                                   | Description     | Auth | Permission       |
+| ------ | ------------------------------------------ | --------------- | ---- | ---------------- |
+| POST   | `/api/sprints/projects/:projectId/sprints` | Create sprint   | ✅   | `manage_sprints` |
+| PUT    | `/api/sprints/:id`                         | Update sprint   | ✅   | `manage_sprints` |
+| DELETE | `/api/sprints/:id`                         | Delete sprint   | ✅   | `manage_sprints` |
+| POST   | `/api/sprints/:id/start`                   | Start sprint    | ✅   | `manage_sprints` |
+| POST   | `/api/sprints/:id/complete`                | Complete sprint | ✅   | `manage_sprints` |
 
 ### 7.6 Departments
 
-| Method | Endpoint                     | Description           | Auth | Role  |
-| ------ | ---------------------------- | --------------------- | ---- | ----- |
-| GET    | `/api/departments`           | Get all departments   | ✅   | All   |
-| POST   | `/api/departments`           | Create department     | ✅   | Admin |
-| GET    | `/api/departments/:id`       | Get department detail | ✅   | All   |
-| PUT    | `/api/departments/:id`       | Update department     | ✅   | Admin |
-| DELETE | `/api/departments/:id`       | Delete department     | ✅   | Admin |
-| GET    | `/api/departments/:id/stats` | Get department stats  | ✅   | All   |
-| PUT    | `/api/departments/reorder`   | Reorder departments   | ✅   | Admin |
+| Method | Endpoint                       | Description         | Auth | Permission                |
+| ------ | ------------------------------ | ------------------- | ---- | ------------------------- |
+| GET    | `/api/departments`             | Get all departments | ✅   | All                       |
+| POST   | `/api/departments`             | Create department   | ✅   | `manage_departments`      |
+| PUT    | `/api/departments/:id`         | Update department   | ✅   | `manage_departments`      |
+| DELETE | `/api/departments/:id`         | Delete department   | ✅   | `manage_departments`      |
+| POST   | `/api/departments/:id/members` | Add division member | ✅   | `manage_division_members` |
 
 ### 7.7 Teams
 
-| Method | Endpoint                         | Description         | Auth | Role      |
-| ------ | -------------------------------- | ------------------- | ---- | --------- |
-| GET    | `/api/teams`                     | Get all teams       | ✅   | All       |
-| POST   | `/api/teams`                     | Create team         | ✅   | Admin, PM |
-| GET    | `/api/teams/:id`                 | Get team detail     | ✅   | All       |
-| PUT    | `/api/teams/:id`                 | Update team         | ✅   | Admin, PM |
-| DELETE | `/api/teams/:id`                 | Delete team         | ✅   | Admin     |
-| GET    | `/api/teams/:id/members`         | Get team members    | ✅   | All       |
-| POST   | `/api/teams/:id/members`         | Add member          | ✅   | Admin, PM |
-| PUT    | `/api/teams/:id/members/:userId` | Update member       | ✅   | Admin, PM |
-| DELETE | `/api/teams/:id/members/:userId` | Remove member       | ✅   | Admin, PM |
-| GET    | `/api/teams/my-teams`            | Get my teams        | ✅   | All       |
-| GET    | `/api/teams/:id/available-users` | Get available users | ✅   | Admin, PM |
+| Method | Endpoint                         | Description        | Auth | Permission              |
+| ------ | -------------------------------- | ------------------ | ---- | ----------------------- |
+| GET    | `/api/teams`                     | Get all teams      | ✅   | All                     |
+| POST   | `/api/teams`                     | Create team        | ✅   | `manage_division_teams` |
+| POST   | `/api/teams/:id/members`         | Add team member    | ✅   | `manage_team_members`   |
+| PUT    | `/api/teams/:id/members/:userId` | Update member role | ✅   | `manage_team_members`   |
 
-### 7.8 Comments
+### 7.8 AI
 
-| Method | Endpoint                     | Description       | Auth | Role           |
-| ------ | ---------------------------- | ----------------- | ---- | -------------- |
-| GET    | `/api/comments/task/:taskId` | Get task comments | ✅   | All            |
-| POST   | `/api/comments`              | Create comment    | ✅   | Admin, PM, Dev |
-| PUT    | `/api/comments/:id`          | Update comment    | ✅   | Author         |
-| DELETE | `/api/comments/:id`          | Delete comment    | ✅   | Admin, Author  |
-
-### 7.9 Notifications
-
-| Method | Endpoint                          | Description          | Auth | Role  |
-| ------ | --------------------------------- | -------------------- | ---- | ----- |
-| GET    | `/api/notifications`              | Get my notifications | ✅   | All   |
-| GET    | `/api/notifications/unread-count` | Get unread count     | ✅   | All   |
-| PUT    | `/api/notifications/:id/read`     | Mark as read         | ✅   | Owner |
-| PUT    | `/api/notifications/read-all`     | Mark all as read     | ✅   | Owner |
-| DELETE | `/api/notifications/:id`          | Delete notification  | ✅   | Owner |
-
-### 7.10 AI
-
-| Method | Endpoint                      | Description          | Auth | Role  |
-| ------ | ----------------------------- | -------------------- | ---- | ----- |
-| POST   | `/api/ai/chat`                | Chat with AI         | ✅   | All   |
-| POST   | `/api/ai/chat/stream`         | Stream chat          | ✅   | All   |
-| GET    | `/api/ai/suggestions/:taskId` | Get task suggestions | ✅   | All   |
-| GET    | `/api/ai/insights/:projectId` | Get project insights | ✅   | All   |
-| GET    | `/api/ai/settings`            | Get AI settings      | ✅   | Admin |
-| PUT    | `/api/ai/settings`            | Update AI settings   | ✅   | Admin |
-| GET    | `/api/ai/usage`               | Get AI usage stats   | ✅   | Admin |
-
-### 7.11 Activities
-
-| Method | Endpoint                             | Description            | Auth | Role |
-| ------ | ------------------------------------ | ---------------------- | ---- | ---- |
-| GET    | `/api/activities`                    | Get all activities     | ✅   | All  |
-| GET    | `/api/activities/project/:projectId` | Get project activities | ✅   | All  |
-| GET    | `/api/activities/user/:userId`       | Get user activities    | ✅   | All  |
-
-### 7.12 Attachments
-
-| Method | Endpoint                  | Description   | Auth | Role            |
-| ------ | ------------------------- | ------------- | ---- | --------------- |
-| POST   | `/api/attachments/upload` | Upload file   | ✅   | Admin, PM, Dev  |
-| GET    | `/api/attachments/:id`    | Download file | ✅   | All             |
-| DELETE | `/api/attachments/:id`    | Delete file   | ✅   | Admin, Uploader |
-
-### 7.13 Labels
-
-| Method | Endpoint          | Description    | Auth | Role      |
-| ------ | ----------------- | -------------- | ---- | --------- |
-| GET    | `/api/labels`     | Get all labels | ✅   | All       |
-| POST   | `/api/labels`     | Create label   | ✅   | Admin, PM |
-| PUT    | `/api/labels/:id` | Update label   | ✅   | Admin, PM |
-| DELETE | `/api/labels/:id` | Delete label   | ✅   | Admin, PM |
-
-### 7.14 Time Logs
-
-| Method | Endpoint                     | Description        | Auth | Role           |
-| ------ | ---------------------------- | ------------------ | ---- | -------------- |
-| GET    | `/api/timelogs`              | Get all time logs  | ✅   | All            |
-| POST   | `/api/timelogs`              | Create time log    | ✅   | Admin, PM, Dev |
-| PUT    | `/api/timelogs/:id`          | Update time log    | ✅   | Admin, Owner   |
-| DELETE | `/api/timelogs/:id`          | Delete time log    | ✅   | Admin, Owner   |
-| GET    | `/api/timelogs/task/:taskId` | Get task time logs | ✅   | All            |
-| GET    | `/api/timelogs/user/:userId` | Get user time logs | ✅   | Admin, Self    |
+| Method | Endpoint              | Description              | Auth | Permission        |
+| ------ | --------------------- | ------------------------ | ---- | ----------------- |
+| POST   | `/api/ai/chat/stream` | Chat with AI (streaming) | ✅   | `use_ai_features` |
+| GET    | `/api/ai/settings`    | Get AI settings          | ✅   | `manage_ai`       |
+| PUT    | `/api/ai/settings`    | Update AI settings       | ✅   | `manage_ai`       |
 
 ---
 
@@ -914,23 +1030,8 @@ DB_PASSWORD=
 JWT_SECRET=your_super_secret_jwt_key_change_this_in_production
 JWT_EXPIRE=7d
 
-# Email (Nodemailer)
-EMAIL_HOST=smtp.gmail.com
-EMAIL_PORT=587
-EMAIL_USER=your_email@gmail.com
-EMAIL_PASSWORD=your_app_password
-EMAIL_FROM=noreply@mpm-agile.com
-
-# File Upload
-MAX_FILE_SIZE=10485760
-UPLOAD_PATH=./uploads
-
 # Frontend URL (for CORS)
 FRONTEND_URL=http://localhost:5173
-
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=900000
-RATE_LIMIT_MAX_REQUESTS=100
 
 # Database Auto-Sync Configuration
 DB_AUTO_SYNC=false
@@ -938,7 +1039,7 @@ DB_SYNC_MODE=alter
 
 # Gemini AI Configuration
 GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-2.5-flash
+GEMINI_MODEL=gemini-2.0-flash
 GEMINI_MAX_TOKENS=2048
 GEMINI_TEMPERATURE=0.7
 
@@ -954,56 +1055,10 @@ REDIS_PASSWORD=
 AI_RATE_LIMIT_PER_USER=50
 AI_RATE_LIMIT_WINDOW_MS=3600000
 AI_QUEUE_CONCURRENCY=5
-AI_DAILY_TOKEN_LIMIT=100000
-AI_USER_DAILY_LIMIT=100
-AI_CACHE_TTL=86400
-```
 
-### 8.2 Frontend Configuration
-
-#### Vite Config (`vite.config.js`)
-
-```javascript
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-
-export default defineConfig({
-  plugins: [react()],
-  server: {
-    port: 5173,
-    proxy: {
-      "/api": {
-        target: "http://localhost:5000",
-        changeOrigin: true,
-      },
-      "/socket.io": {
-        target: "http://localhost:5000",
-        ws: true,
-      },
-    },
-  },
-});
-```
-
-#### Tailwind Config (`tailwind.config.js`)
-
-```javascript
-module.exports = {
-  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
-  darkMode: "class",
-  theme: {
-    extend: {
-      colors: {
-        primary: {
-          50: "#eff6ff",
-          // ... color scale
-          900: "#1e3a8a",
-        },
-      },
-    },
-  },
-  plugins: [],
-};
+# RBAC Configuration
+RBAC_DEBUG=false
+RBAC_CACHE_TTL=3600
 ```
 
 ---
@@ -1014,174 +1069,314 @@ module.exports = {
 
 - Node.js v18+
 - MySQL 8.0+
-- Redis (optional, untuk AI queue)
+- Redis (optional, untuk AI queue & RBAC caching)
 - Git
 
-### 9.2 Clone Repository
-
-```bash
-git clone https://github.com/ThomsonSimbolon/app-mpm-agile-tools.git
-cd app-mpm-agile-tools
-```
-
-### 9.3 Setup Database
+### 9.2 Setup Database
 
 ```sql
 CREATE DATABASE mpm_agile_tools;
 ```
 
-### 9.4 Setup Backend
+### 9.3 Run RBAC Migration
+
+```bash
+# Login to MySQL
+mysql -u root -p mpm_agile_tools < backend/src/migrations/20251210_enterprise_rbac.sql
+```
+
+### 9.4 Seed RBAC Data
 
 ```bash
 cd backend
+node src/seeders/rbacSeeder.js
+```
 
-# Install dependencies
+### 9.5 Setup Backend
+
+```bash
+cd backend
 npm install
-
-# Copy environment file
 cp .env.example .env
-
 # Edit .env with your configuration
-nano .env
-
-# Set DB_AUTO_SYNC=true for first run to create tables
-# Then set it back to false
-
-# Start server
 npm run dev
 ```
 
-### 9.5 Setup Frontend
+### 9.6 Setup Frontend
 
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
-
-### 9.6 Access Application
-
-- Frontend: http://localhost:5173
-- Backend API: http://localhost:5000/api
-- Socket.IO: http://localhost:5000
 
 ---
 
 ## 10. Panduan Penggunaan
 
-### 10.1 Pertama Kali
+### 10.1 Setup RBAC Pertama Kali
 
-1. **Register Admin Account**
+1. **Create Super Admin**
 
-   - Buka http://localhost:5173/register
-   - Daftar dengan email dan password
-   - User pertama otomatis jadi admin (atau ubah manual di database)
+   - Register user pertama via `/register`
+   - Update system_role di database:
 
-2. **Login**
+   ```sql
+   UPDATE users SET system_role = 'super_admin' WHERE email = 'admin@example.com';
+   ```
 
-   - Buka http://localhost:5173/login
-   - Masukkan credentials
+2. **Setup Departments (Divisi)**
 
-3. **Setup Organization**
+   - Login sebagai Super Admin
+   - Buka menu Departments
+   - Tambahkan divisi: IT, HRD, Finance, dll
 
-   - Buat Department di menu Teams
-   - Buat Team di dalam Department
-   - Invite anggota tim
+3. **Setup Teams**
 
-4. **Create Project**
-   - Klik "New Project" di Dashboard
-   - Isi detail project
-   - Add team members ke project
+   - Buat team di dalam department
+   - Assign team lead dan members
 
-### 10.2 Workflow Sehari-hari
+4. **Setup Projects**
+   - Buat project baru
+   - Assign project members dengan role yang sesuai
 
-#### Project Manager
+### 10.2 Assign Roles
 
-1. Create/manage sprints
-2. Create tasks dan assign ke developer
-3. Monitor progress di Dashboard
-4. Review completed tasks
+#### Via API
 
-#### Developer
+```javascript
+// Update user's system role (Super Admin only)
+PUT /api/rbac/users/5/system-role
+{
+  "system_role": "admin",
+  "institution_role": "Admin Sistem",
+  "reason": "Promoted to admin"
+}
 
-1. Check assigned tasks di "My Tasks"
-2. Update task status sesuai progress
-3. Add comments dan time logs
-4. Move tasks di Kanban board
+// Create temporary role assignment
+POST /api/rbac/users/5/assignments
+{
+  "role_type": "project",
+  "role_name": "project_manager",
+  "resource_type": "project",
+  "resource_id": 3,
+  "valid_from": "2025-01-01",
+  "valid_until": "2025-03-31",
+  "notes": "Temporary PM for Q1 project"
+}
+```
 
-#### Viewer
+### 10.3 Check Permissions
 
-1. View project progress
-2. View tasks dan sprints
-3. Access reports dan dashboard
+```javascript
+// Get current user's effective permissions
+GET /api/rbac/my-permissions?project_id=5
 
-### 10.3 Fitur AI Assistant
-
-1. **Akses AI Chat**
-
-   - Klik icon AI di header
-   - Atau buka menu AI Dashboard
-
-2. **Gunakan AI untuk:**
-   - Generate task breakdown
-   - Analisis bug
-   - Sprint planning suggestions
-   - Code review
-
-### 10.4 Notifications
-
-- Real-time notifications via WebSocket
-- Notification badge di header
-- Click untuk melihat detail
-- Mark as read / Mark all as read
-
----
-
-## 📝 Catatan Penting
-
-### Security Considerations
-
-1. Ganti `JWT_SECRET` di production
-2. Gunakan HTTPS di production
-3. Set `DB_AUTO_SYNC=false` di production
-4. Implementasi rate limiting
-5. Validasi input di semua endpoint
-
-### Performance Tips
-
-1. Enable Redis untuk caching AI responses
-2. Gunakan pagination untuk list besar
-3. Optimize database queries dengan indexing
-4. Implement lazy loading di frontend
-
-### Known Limitations
-
-1. File upload max 10MB
-2. AI rate limit 50 requests/hour per user
-3. WebSocket tidak support clustering tanpa Redis adapter
+// Response
+{
+  "success": true,
+  "data": {
+    "userId": 1,
+    "context": { "projectId": 5 },
+    "roles": {
+      "system": "admin",
+      "division": null,
+      "team": "team_lead",
+      "project": "project_manager"
+    },
+    "permissions": ["create_task", "edit_task", "delete_task", ...],
+    "permissionCount": 25
+  }
+}
+```
 
 ---
 
-## 🤝 Contributing
+## 📊 Summary
 
-1. Fork repository
-2. Create feature branch
-3. Commit changes
-4. Push to branch
-5. Create Pull Request
+### Total Components
+
+| Category            | Count |
+| ------------------- | ----- |
+| API Endpoints       | 100+  |
+| Database Tables     | 23+   |
+| RBAC Roles          | 21    |
+| RBAC Permissions    | 40+   |
+| Frontend Components | 45+   |
+
+### Key Features
+
+- ✅ Multi-Layer RBAC (4 levels)
+- ✅ Conditional Permissions
+- ✅ Super Admin Override
+- ✅ Permission Audit Logging
+- ✅ Dynamic Role Assignment
+- ✅ Validity Period for Roles
+- ✅ Institution Mapping
+- ✅ AI Integration (Gemini)
+- ✅ Real-time Notifications
+- ✅ Kanban Board
+- ✅ **Approval Workflow** (NEW!)
+- ✅ **Leave & Delegation Management** (NEW!)
 
 ---
 
-## 📄 License
+## 11. Approval Workflow & Delegation System (NEW!)
 
-MIT License - lihat file LICENSE untuk detail.
+### 11.1 Overview
+
+Sistem Approval Workflow dan Delegasi Tugas memungkinkan:
+
+- Task memerlukan persetujuan sebelum lanjut ke tahap berikutnya
+- User dapat mengajukan cuti dan menunjuk delegate
+- Otomatis reassign task ke delegate saat user cuti
+- Tracking history delegasi dan approval
+
+### 11.2 Approval Workflow
+
+#### Flow Approval
+
+```
+┌─────────┐     ┌───────────┐     ┌──────────┐     ┌──────────┐
+│  Create │────▶│  Request  │────▶│  Pending │────▶│ Approved │
+│   Task  │     │  Approval │     │  Review  │     │   /Done  │
+└─────────┘     └───────────┘     └──────────┘     └──────────┘
+                                        │
+                                        ▼
+                                  ┌──────────┐
+                                  │ Rejected │
+                                  └──────────┘
+```
+
+#### Approval Types
+
+| Type              | Description                       |
+| ----------------- | --------------------------------- |
+| task_creation     | Approval saat task baru dibuat    |
+| status_change     | Approval saat status task berubah |
+| priority_change   | Approval saat prioritas berubah   |
+| assignment_change | Approval saat task dipindahkan    |
+| sprint_move       | Approval saat task pindah sprint  |
+| qa_review         | QA Review sebelum task selesai    |
+
+#### API Endpoints
+
+| Method | Endpoint                    | Description                  |
+| ------ | --------------------------- | ---------------------------- |
+| GET    | /api/approvals/my-pending   | Get pending approvals for me |
+| GET    | /api/approvals/pending      | Get all pending approvals    |
+| GET    | /api/approvals/task/:taskId | Get approvals for a task     |
+| GET    | /api/approvals/history      | Get approval history         |
+| GET    | /api/approvals/stats        | Get approval statistics      |
+| POST   | /api/approvals/request      | Request approval for a task  |
+| PUT    | /api/approvals/:id/approve  | Approve a request            |
+| PUT    | /api/approvals/:id/reject   | Reject a request             |
+| PUT    | /api/approvals/:id/cancel   | Cancel a request             |
+
+### 11.3 Leave & Delegation Management
+
+#### Leave Flow
+
+```
+┌─────────┐     ┌───────────┐     ┌──────────┐     ┌──────────┐
+│ Request │────▶│  Pending  │────▶│ Approved │────▶│  Active  │
+│  Leave  │     │  Approval │     │          │     │          │
+└─────────┘     └───────────┘     └──────────┘     └──────────┘
+                      │                                  │
+                      ▼                                  ▼
+                ┌──────────┐                       ┌──────────┐
+                │ Rejected │                       │ Complete │
+                └──────────┘                       └──────────┘
+```
+
+#### Delegation Flow
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        LEAVE ACTIVATED                               │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│  Auto-delegate tasks to designated delegate (if enabled)           │
+│  - All active tasks of user are reassigned                          │
+│  - Delegation records created for tracking                          │
+│  - Delegate receives notification                                   │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                        LEAVE COMPLETED                               │
+└─────────────────────────────────────────────────────────────────────┘
+                              │
+              ┌───────────────┴───────────────┐
+              ▼                               ▼
+    ┌─────────────────┐             ┌─────────────────┐
+    │ Return tasks to │             │ Keep tasks with │
+    │ original owner  │             │    delegate     │
+    └─────────────────┘             └─────────────────┘
+```
+
+#### Leave Types
+
+| Type      | Description        |
+| --------- | ------------------ |
+| annual    | Cuti Tahunan       |
+| sick      | Cuti Sakit         |
+| personal  | Cuti Pribadi       |
+| maternity | Cuti Melahirkan    |
+| paternity | Cuti Ayah          |
+| unpaid    | Cuti Tanpa Gaji    |
+| remote    | Work From Home     |
+| training  | Training/Pelatihan |
+| other     | Lainnya            |
+
+#### API Endpoints
+
+| Method | Endpoint                               | Description                 |
+| ------ | -------------------------------------- | --------------------------- |
+| GET    | /api/leaves/my                         | Get my leave requests       |
+| GET    | /api/leaves                            | Get all leaves (admin)      |
+| GET    | /api/leaves/pending                    | Get pending leave approvals |
+| POST   | /api/leaves                            | Create leave request        |
+| PUT    | /api/leaves/:id                        | Update leave request        |
+| DELETE | /api/leaves/:id                        | Cancel leave request        |
+| POST   | /api/leaves/:id/approve                | Approve leave request       |
+| POST   | /api/leaves/:id/reject                 | Reject leave request        |
+| POST   | /api/leaves/:id/activate               | Activate leave (admin)      |
+| POST   | /api/leaves/:id/complete               | Complete leave (admin)      |
+| GET    | /api/leaves/delegations/my             | Get my delegations          |
+| GET    | /api/leaves/users/:userId/leave-status | Check user leave status     |
+
+### 11.4 Database Tables
+
+| Table            | Description                        |
+| ---------------- | ---------------------------------- |
+| task_approvals   | Stores approval requests for tasks |
+| user_leaves      | Stores user leave/absence records  |
+| task_delegations | Stores task delegation history     |
+
+### 11.5 RBAC Permissions
+
+| Permission              | Roles                       |
+| ----------------------- | --------------------------- |
+| approve_workflow        | PM, Team Lead, Scrum Master |
+| qa_approval             | QA Lead, Tech Lead          |
+| manage_leave_delegation | Division Head, HR, Admin    |
+
+### 11.6 Frontend Pages
+
+| Page              | Path       | Description                      |
+| ----------------- | ---------- | -------------------------------- |
+| ApprovalDashboard | /approvals | View & manage approval requests  |
+| LeaveManagement   | /leaves    | Request leave & view delegations |
 
 ---
 
-> **Dokumentasi ini diupdate pada:** 10 Desember 2025  
-> **Versi Aplikasi:** 1.0.0  
+> **Dokumentasi ini diupdate pada:** 12 Desember 2025  
+> **Versi Aplikasi:** 2.1.0  
 > **Maintained by:** MPM Agile Tools Team
+
+---
+
+**Built with ❤️ using Node.js, React, TailwindCSS, and Enterprise RBAC**

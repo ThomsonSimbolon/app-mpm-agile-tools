@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { projectService } from "../services/projectService";
 import { taskService } from "../services/taskService";
+import { useRbac } from "../contexts/RbacContext";
 import Header from "../components/layout/Header";
 import Card from "../components/common/Card";
 import Button from "../components/common/Button";
@@ -13,6 +14,7 @@ import { useSocket } from "../contexts/SocketContext";
 
 export default function KanbanPage() {
   const { projectId } = useParams();
+  const { hasAnyPermission, isSystemAdmin } = useRbac();
   const [project, setProject] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -23,6 +25,14 @@ export default function KanbanPage() {
   });
   const [refreshKey, setRefreshKey] = useState(0);
   const { joinProject, leaveProject, onTaskUpdate } = useSocket();
+
+  // RBAC Permission check for creating tasks
+  const canCreateTask = () => {
+    return (
+      hasAnyPermission(["create_task", "assign_task", "manage_all_projects"]) ||
+      isSystemAdmin()
+    );
+  };
 
   useEffect(() => {
     loadProject();
@@ -123,14 +133,16 @@ export default function KanbanPage() {
                 <span>Sprints</span>
               </Button>
             </Link>
-            <Button
-              variant="primary"
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center space-x-2"
-            >
-              <Plus size={20} />
-              <span>New Task</span>
-            </Button>
+            {canCreateTask() && (
+              <Button
+                variant="primary"
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center space-x-2"
+              >
+                <Plus size={20} />
+                <span>New Task</span>
+              </Button>
+            )}
           </div>
         </div>
 

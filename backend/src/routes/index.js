@@ -21,6 +21,15 @@ const teamRoutes = require("./teamRoutes");
 // Enterprise RBAC Routes
 const rbacRoutes = require("./rbacRoutes");
 
+// Approval & Leave/Delegation Routes
+const approvalRoutes = require("./approvalRoutes");
+const leaveRoutes = require("./leaveRoutes");
+
+// Calendar & Scheduling Routes
+const calendarRoutes = require("./calendarRoutes");
+const milestoneRoutes = require("./milestoneRoutes");
+const ganttRoutes = require("./ganttRoutes");
+
 // Mount routes
 router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
@@ -40,5 +49,14 @@ router.use("/teams", teamRoutes);
 
 // Enterprise RBAC
 router.use("/rbac", rbacRoutes);
+
+// Approval & Leave/Delegation
+router.use("/approvals", approvalRoutes);
+router.use("/leaves", leaveRoutes);
+
+// Calendar & Scheduling
+router.use("/calendar", calendarRoutes);
+router.use("/milestones", milestoneRoutes);
+router.use("/gantt", ganttRoutes);
 
 module.exports = router;

@@ -15,6 +15,10 @@ import {
   Sparkles,
   Users,
   Shield,
+  UserCog,
+  CheckSquare,
+  Calendar,
+  CalendarDays,
 } from "lucide-react";
 import { NotificationDropdown } from "../notification";
 
@@ -97,6 +101,14 @@ export default function Header() {
               <Users size={18} />
               <span>Tim</span>
             </Link>
+            {/* Leave Management */}
+            <Link
+              to="/leaves"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+            >
+              <Calendar size={18} />
+              <span>Cuti</span>
+            </Link>
             {/* AI Dashboard - Admin Only */}
             {user?.role === "admin" && (
               <Link
@@ -119,6 +131,34 @@ export default function Header() {
                 <span>RBAC</span>
               </Link>
             )}
+            {/* User Management - System Admin Only */}
+            {(isSystemAdmin() ||
+              user?.role === "admin" ||
+              user?.system_role === "super_admin" ||
+              user?.system_role === "admin") && (
+              <Link
+                to="/admin/users"
+                className="flex items-center space-x-2 px-3 py-2 rounded-md text-orange-600 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-colors"
+              >
+                <UserCog size={18} />
+                <span>Users</span>
+              </Link>
+            )}
+            {/* Approvals - For users with approve_workflow permission */}
+            <Link
+              to="/calendar"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            >
+              <CalendarDays size={18} />
+              <span>Calendar</span>
+            </Link>
+            <Link
+              to="/approvals"
+              className="flex items-center space-x-2 px-3 py-2 rounded-md text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
+            >
+              <CheckSquare size={18} />
+              <span>Approvals</span>
+            </Link>
           </nav>
 
           {/* Right Side */}
